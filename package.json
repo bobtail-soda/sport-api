@@ -9,11 +9,18 @@
     "build": "vite build"
   },
   "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.1.0",
+    "eslint-config-prettier": "^9.1.0",
     "nodemon": "^3.0.1",
+    "prettier": "^3.2.4",
     "vite": "^5.0.2"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.1",
     "express": "^4.18.2",
+    "mongoose": "^8.1.1",
     "vite-express": "*"
   }
 }
