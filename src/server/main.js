@@ -17,5 +17,5 @@ app.use('/api/users', userRouter);
 app.get('/hello', (req, res) => {
   res.send('Hello Vite!');
 });
-mongo();
+mongo(); // To test that we connected with mongoDB
 ViteExpress.listen(app, config.port, () => console.log(`Server is listening on port ${config.port}...`));

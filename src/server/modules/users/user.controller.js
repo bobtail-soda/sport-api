@@ -1,6 +1,6 @@
 import userModel from './user.model.js';
 
-const createUser = async (req, res) => {
+const createUser = async (req, res) => { // POST
   try {
     const { userName, email, password, phone } = req.body;
     const user = await userModel.create({ userName, email, password, phone });
@@ -21,7 +21,7 @@ const createUser = async (req, res) => {
   }
 };
 
-const getUsers = async (req, res) => {
+const getUsers = async (req, res) => { // GET
   try {
     const users = await userModel.find({});
     users.forEach((user) => (user.password = undefined));
@@ -41,7 +41,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res) => { //GET
   try {
     const { id } = req.params;
     const user = await userModel.findById(id);
@@ -62,7 +62,7 @@ const getUserById = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res) => { // POST
   try {
     const { id } = req.params;
     const { userName, email, phone, avatar } = req.body;
@@ -108,7 +108,7 @@ const updateUser = async (req, res) => {
   }
 };
 
-const changePassword = async (req, res) => {
+const changePassword = async (req, res) => { //PUT
   try {
     const { id } = req.params;
     const { password } = req.body;
@@ -142,7 +142,7 @@ const changePassword = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => { //DELETE
   try {
     const { id } = req.params;
 
