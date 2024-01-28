@@ -14,7 +14,6 @@ import bcrypt from 'bcrypt';
 // step 2 use jsonwebtoken
 import jwt from 'jsonwebtoken'
 
-
 // console.log({ config });
 
 const app = express();
@@ -29,7 +28,7 @@ app.get('/hello', (req, res) => {
   res.send('Hello Health check!');
 });
 
-app.put('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   try {
     const email = req.body.email;
     const password = req.body.password;
