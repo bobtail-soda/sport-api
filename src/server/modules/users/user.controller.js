@@ -1,11 +1,19 @@
 import userModel from './user.model.js';
+import bcrypt from 'bcrypt';
 
-const createUser = async (req, res) => { // POST
+const createUser = async (req, res) => {
+  // POST
   try {
     const { userName, email, password, phone } = req.body;
-    const user = await userModel.create({ userName, email, password, phone });
-    user.password = undefined;
 
+    // Hash password
+    const saltRounds = 15;
+    const hashedPassword = await bcrypt.hash(password, saltRounds)
+
+    // create new user 
+    const user = await userModel.create({ userName, email, password: hashedPassword, phone });
+    user.password = undefined;
+    console.log('create user success');
     res.status(201).send({
       success: true,
       message: 'User created successfully',
@@ -21,7 +29,8 @@ const createUser = async (req, res) => { // POST
   }
 };
 
-const getUsers = async (req, res) => { // GET
+const getUsers = async (req, res) => {
+  // GET
   try {
     const users = await userModel.find({});
     users.forEach((user) => (user.password = undefined));
@@ -41,7 +50,8 @@ const getUsers = async (req, res) => { // GET
   }
 };
 
-const getUserById = async (req, res) => { //GET
+const getUserById = async (req, res) => {
+  //GET
   try {
     const { id } = req.params;
     const user = await userModel.findById(id);
@@ -54,15 +64,21 @@ const getUserById = async (req, res) => { //GET
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    res.status(404).send({
       success: false,
-      message: 'Internal server error',
+      message: 'Id not found',
       error: error,
     });
   }
 };
 
-const updateUser = async (req, res) => { // POST
+const getUserByEmail = async (email) => {
+  const user = await userModel.findOne({ email: email})
+  return user;
+}
+
+const updateUser = async (req, res) => {
+  // POST
   try {
     const { id } = req.params;
     const { userName, email, phone, avatar } = req.body;
@@ -108,7 +124,8 @@ const updateUser = async (req, res) => { // POST
   }
 };
 
-const changePassword = async (req, res) => { //PUT
+const changePassword = async (req, res) => {
+  //PUT
   try {
     const { id } = req.params;
     const { password } = req.body;
@@ -142,7 +159,8 @@ const changePassword = async (req, res) => { //PUT
   }
 };
 
-const deleteUser = async (req, res) => { //DELETE
+const deleteUser = async (req, res) => {
+  //DELETE
   try {
     const { id } = req.params;
 
@@ -169,4 +187,4 @@ const deleteUser = async (req, res) => { //DELETE
   }
 };
 
-export default { createUser, getUsers, getUserById, updateUser, changePassword, deleteUser };
+export default { createUser, getUsers, getUserById, getUserByEmail, updateUser, changePassword, deleteUser };
