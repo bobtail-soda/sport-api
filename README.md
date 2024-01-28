@@ -1,6 +1,6 @@
 # sport-api
 
-# create back-end starter
+# create back-end starter with 5 easy step
 ### step 1: to initial project folder write this code on terminal 
 `npx create-vite-express` 
 ### step 2: set up config
