@@ -8,9 +8,9 @@ const createUser = async (req, res) => {
 
     // Hash password
     const saltRounds = 15;
-    const hashedPassword = await bcrypt.hash(password, saltRounds)
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // create new user 
+    // create new user
     const user = await userModel.create({ userName, email, password: hashedPassword, phone });
     user.password = undefined;
     console.log('create user success');
@@ -32,8 +32,15 @@ const createUser = async (req, res) => {
 const getUsers = async (req, res) => {
   // GET
   try {
-    const users = await userModel.find({});
-    users.forEach((user) => (user.password = undefined));
+    // const users = await userModel.find({});
+    // users.forEach((user) =>  user.password = undefined)
+    // const modifiedUsers = users.map(user => {
+    //   const {_id, userName, email, phone, avatar} = user.toJSON();
+    //   return { _id, userName, email, phone, avatar };
+    // });
+
+    const users = await userModel.find({}).select(' _id userName email phone avatar').lean();
+    console.log(users);
 
     res.status(200).send({
       success: true,
@@ -73,9 +80,9 @@ const getUserById = async (req, res) => {
 };
 
 const getUserByEmail = async (email) => {
-  const user = await userModel.findOne({ email: email})
+  const user = await userModel.findOne({ email: email });
   return user;
-}
+};
 
 const updateUser = async (req, res) => {
   // POST
@@ -130,6 +137,10 @@ const changePassword = async (req, res) => {
     const { id } = req.params;
     const { password } = req.body;
 
+    // hash password
+    const saltRounds = 15;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
     const user = await userModel.findById(id);
     if (!user) {
       res.status(404).send({
@@ -140,7 +151,7 @@ const changePassword = async (req, res) => {
     }
 
     if (password) {
-      user.password = password;
+      user.password = hashedPassword;
     }
 
     await user.save();
