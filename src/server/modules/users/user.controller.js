@@ -61,7 +61,7 @@ const getUserById = async (req, res) => {
   //GET
   try {
     const { id } = req.params;
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).select(' _id userName email phone avatar').lean();;
     user.password = undefined;
 
     res.status(200).send({
@@ -80,7 +80,7 @@ const getUserById = async (req, res) => {
 };
 
 const getUserByEmail = async (email) => {
-  const user = await userModel.findOne({ email: email });
+  const user = await userModel.findOne({ email: email }).select(' _id userName email phone avatar').lean();;
   return user;
 };
 
@@ -90,7 +90,7 @@ const updateUser = async (req, res) => {
     const { id } = req.params;
     const { userName, email, phone, avatar } = req.body;
 
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).select(' _id userName email phone avatar').lean();;
     if (!user) {
       res.status(404).send({
         success: false,
@@ -141,7 +141,7 @@ const changePassword = async (req, res) => {
     const saltRounds = 15;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).select(' _id userName email phone avatar').lean();;
     if (!user) {
       res.status(404).send({
         success: false,
