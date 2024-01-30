@@ -69,7 +69,6 @@ function createJwt(user) {
   const token = jwt.sign({ data: user}, jwtSecretKey, {
     expiresIn: "12h",
   });
-
   return token;
 }
 
