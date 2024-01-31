@@ -206,10 +206,39 @@ const updateExerciseActivity = async (req, res) => {
   }
 };
 
+const deleteExerciseActivity = async (req, res) => {
+  //DELETE
+  try {
+    const { id } = req.params;
+
+    const exerciseActivity = await exerciseActivityModel.findByIdAndDelete(id);
+    if (!exerciseActivity) {
+      res.status(404).send({
+        success: false,
+        message: 'Exercise Activity not found',
+      });
+      return;
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'Exercise Activity deleted successfully',
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
 export default {
   getExerciseActivity,
   createExerciseActivity,
   getExerciseActivityById,
   getExerciseActivityByUserId,
   updateExerciseActivity,
+  deleteExerciseActivity,
 };
