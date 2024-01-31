@@ -39,7 +39,7 @@ const getUsers = async (req, res) => {
     //   return { _id, userName, email, phone, avatar };
     // });
 
-    const users = await userModel.find({}).select(' _id userName email phone avatar').lean();
+    const users = await userModel.find({}).select(' _id userName email phone avatar exercise_activities').lean();
     console.log(users);
 
     res.status(200).send({

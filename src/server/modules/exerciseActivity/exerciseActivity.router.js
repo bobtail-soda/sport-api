@@ -1,10 +1,11 @@
 import express from 'express';
+import { auth } from '../users/user.auth.js';
 import exerciseActivityController from './exerciseActivity.controller.js';
-// import { auth } from '../users/user.auth.js';
 
 const router = express.Router();
-router.get('/', exerciseActivityController.getExerciseActivity);
-router.post('/', exerciseActivityController.createExerciseActivity);
-
+router.get('/', auth, exerciseActivityController.getExerciseActivity);
+router.get('/:id', auth, exerciseActivityController.getExerciseActivityById);
+router.post('/', auth, exerciseActivityController.createExerciseActivity);
+router.put('/:id', auth, exerciseActivityController.updateExerciseActivity);
 
 export default router;
