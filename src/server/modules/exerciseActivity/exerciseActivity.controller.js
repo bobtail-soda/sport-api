@@ -1,6 +1,8 @@
 import userModel from '../users/user.model.js';
 import exerciseActivityModel from './exerciseActivity.model.js';
-// import auth from '../users/user.auth.js'; TODO: uncomment when get code from branch 'hashPassword'
+import { ObjectId } from 'mongoose';
+import userController from '../users/user.controller.js';
+// import auth from '../users/user.auth.js'; //TODO: uncomment when get code from branch 'hashPassword'
 
 const getExerciseActivity = async (req, res) => {
   // GET
@@ -23,14 +25,87 @@ const getExerciseActivity = async (req, res) => {
   }
 };
 
+const getExerciseActivityById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const exerciseActivity = await exerciseActivityModel.findById(id).select(' _id caption description hour minute date image activity_type_id');
+
+    res.status(200).send({
+      success: true,
+      message: `Exercise Activity by ${id} get successfully`,
+      data: exerciseActivity,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error: error,
+    });
+  }
+};
+
+
+const getExerciseActivityByUserId = async (req, res) => {
+  // GET
+  try {
+    //find user by id
+    const user_id = req.params.user_id;
+    const user = await userModel.findById(user_id);
+     console.log("user", user);
+
+    const exerciseActivities = user.exercise_activities;
+    console.log('exerciseActivitiesArray: ', exerciseActivities);
+
+    const docs = await exerciseActivityModel.find({
+      _id: { $in: exerciseActivities },
+    }).exec();
+
+    console.log("docs: ", docs);
+
+    // const xxx = exerciseActivities.toString();
+    // console.log('xxx:', xxx.exercise_activities);
+
+    // const exerciseActivityIds = exerciseActivities.map((exerciseActivity) => exerciseActivity._id);
+    // console.log("exerciseActivityIds: ", exerciseActivityIds);
+
+    // // exerciseActivities.forEach((exerciseActivity) => (exerciseActivity._id = undefined));
+    // const result = `${exerciseActivityIds}`;
+    // // console.log('exerciseActivity after loop result: ', exerciseActivityIds.toString());
+    // console.log('exerciseActivity after loop result: ', result);
+
+    // const exerciseActivityResult = await exerciseActivityModel.findById(result);
+
+
+
+    res.status(200).send({
+      success: true,
+      message: `Exercise Activity by ${user_id} get successfully`,
+      data: docs, //exerciseActivityResult
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error: error,
+    });
+  }
+};
+
 const createExerciseActivity = async (req, res) => {
   // POST
   try {
     const { activity_type_id, caption, description, hour, minute, date, image } = req.body;
 
     //Step1: get user from token
-    // const user_id = auth.req.user._id  TODO: uncomment when get code from branch 'hashPassword'
-    const user_id = '65b681af0b05bc9144534cab'; // TODO: fixed for waiting code from branch 'hashPassword'
+    /**
+     * req.user.data from user.auth.js
+     * get user from token
+     */
+    const user_id = req.user.data._id;
+
     const user = await userModel.findById(user_id);
     if (!user) {
       res.status(404).send({
@@ -74,4 +149,67 @@ const createExerciseActivity = async (req, res) => {
   }
 };
 
-export default { getExerciseActivity, createExerciseActivity };
+const updateExerciseActivity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { activity_type_id, caption, description, hour, minute, date, image } = req.body;
+
+    const exerciseActivity = await exerciseActivityModel
+      .findById(id)
+      .select(' activity_type_id, caption, description, hour, minute, date, image');
+
+      console.log('exerciseActivity: ', exerciseActivity);
+    if (!exerciseActivity) {
+      res.status(404).send({
+        success: false,
+        message: 'Exercise Activity not found',
+      });
+      return;
+    }
+
+    if (activity_type_id) {
+      exerciseActivity.activity_type_id = activity_type_id;
+    }
+    if (caption) {
+      exerciseActivity.caption = caption;
+    }
+    if (description) {
+      exerciseActivity.description = description;
+    }
+    if (hour) {
+      exerciseActivity.hour = hour;
+    }
+    if (minute) {
+      exerciseActivity.minute = minute;
+    }
+    if (date) {
+      exerciseActivity.date = date;
+    }
+    if (image) {
+      exerciseActivity.image = image;
+    }
+
+    await exerciseActivity.save();
+
+    res.status(200).send({
+      success: true,
+      message: 'Exercise Activity updated successfully',
+      data: exerciseActivity,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
+export default {
+  getExerciseActivity,
+  createExerciseActivity,
+  getExerciseActivityById,
+  getExerciseActivityByUserId,
+  updateExerciseActivity,
+};
