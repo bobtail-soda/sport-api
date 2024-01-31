@@ -7,17 +7,13 @@ import morgan from 'morgan';
 import ViteExpress from 'vite-express';
 import { config } from './config/config.js';
 import mongo from './database/db.js';
-import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
-import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js'
-import clc from 'cli-color';
-import morgan from 'morgan';
-import helmet from 'helmet';
+import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
 import userController from './modules/users/user.controller.js';
 // step 1 use bcrypt
 import bcrypt from 'bcrypt';
 // step 2 use jsonwebtoken
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
 // console.log({ config });
 
@@ -52,7 +48,7 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ error: { message: 'Invalid password' } });
     }
 
-    res.status(200).json({ token: createJwt(user)});
+    res.status(200).json({ token: createJwt(user) });
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(404).json({ error: 'User not found' });
@@ -60,14 +56,14 @@ app.post('/login', async (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendStatus(404)
-})
+  res.sendStatus(404);
+});
 
 // create webtoken
 function createJwt(user) {
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
-  const token = jwt.sign({ data: user}, jwtSecretKey, {
-    expiresIn: "12h",
+  const token = jwt.sign({ data: user }, jwtSecretKey, {
+    expiresIn: '12h',
   });
   return token;
 }
