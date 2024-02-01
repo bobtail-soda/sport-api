@@ -10,12 +10,11 @@ import mongo from './database/db.js';
 import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
-// step 1 use bcrypt
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
+import userModel from './modules/users/user.model.js';
 import bcrypt from 'bcrypt';
-// step 2 use jsonwebtoken
 import jwt from 'jsonwebtoken';
-
-// console.log({ config });
 
 const app = express();
 
@@ -54,6 +53,56 @@ app.post('/login', async (req, res) => {
     res.status(404).json({ error: 'User not found' });
   }
 });
+
+////////////////////////////////////////////////////////////
+// upload photo part
+cloudinary.config({
+  cloud_name: config.cloud_name,
+  api_key: config.api_key,
+  api_secret: config.api_secret,
+});
+
+async function uploadToCloudinary(req, res, next) {
+  const fileBufferBase64 = Buffer.from(req.file.buffer).toString('base64');
+  const base64File = `data:${req.file.mimetype};base64,${fileBufferBase64}`;
+  req.cloudinary = await cloudinary.uploader.upload(base64File, {
+    resource_type: 'auto',
+  });
+
+  next();
+}
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// upload photo function
+
+const updatePhotoByUserID = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedPhoto = await userModel.findByIdAndUpdate(id, { avatar: req.cloudinary.secure_url });
+    if (!updatedPhoto) {
+      res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+    res.json({ data: updatedPhoto });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
+
+app.patch('/hey/:id', upload.single('image'), uploadToCloudinary, updatePhotoByUserID);
+////////////////////////////////////////////////////////////
+
 
 app.get('*', (req, res) => {
   res.sendStatus(404);
