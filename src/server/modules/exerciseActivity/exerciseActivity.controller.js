@@ -1,7 +1,5 @@
 import userModel from '../users/user.model.js';
 import exerciseActivityModel from './exerciseActivity.model.js';
-import { ObjectId } from 'mongoose';
-import userController from '../users/user.controller.js';
 // import auth from '../users/user.auth.js'; //TODO: uncomment when get code from branch 'hashPassword'
 
 const getExerciseActivity = async (req, res) => {
@@ -29,7 +27,9 @@ const getExerciseActivityById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const exerciseActivity = await exerciseActivityModel.findById(id).select(' _id caption description hour minute date image activity_type_id');
+    const exerciseActivity = await exerciseActivityModel
+      .findById(id)
+      .select(' _id caption description hour minute date image activity_type_id');
 
     res.status(200).send({
       success: true,
@@ -46,23 +46,25 @@ const getExerciseActivityById = async (req, res) => {
   }
 };
 
-
 const getExerciseActivityByUserId = async (req, res) => {
   // GET
   try {
+    console.log('start: getExerciseActivityByUserId');
     //find user by id
     const user_id = req.params.user_id;
     const user = await userModel.findById(user_id);
-     console.log("user", user);
+    console.log('user', user);
 
     const exerciseActivities = user.exercise_activities;
     console.log('exerciseActivitiesArray: ', exerciseActivities);
 
-    const docs = await exerciseActivityModel.find({
-      _id: { $in: exerciseActivities },
-    }).exec();
+    const docs = await exerciseActivityModel
+      .find({
+        _id: { $in: exerciseActivities },
+      })
+      .exec();
 
-    console.log("docs: ", docs);
+    console.log('docs: ', docs);
 
     // const xxx = exerciseActivities.toString();
     // console.log('xxx:', xxx.exercise_activities);
@@ -76,8 +78,6 @@ const getExerciseActivityByUserId = async (req, res) => {
     // console.log('exerciseActivity after loop result: ', result);
 
     // const exerciseActivityResult = await exerciseActivityModel.findById(result);
-
-
 
     res.status(200).send({
       success: true,
@@ -158,7 +158,7 @@ const updateExerciseActivity = async (req, res) => {
       .findById(id)
       .select(' activity_type_id, caption, description, hour, minute, date, image');
 
-      console.log('exerciseActivity: ', exerciseActivity);
+    console.log('exerciseActivity: ', exerciseActivity);
     if (!exerciseActivity) {
       res.status(404).send({
         success: false,
@@ -206,10 +206,39 @@ const updateExerciseActivity = async (req, res) => {
   }
 };
 
+const deleteExerciseActivity = async (req, res) => {
+  //DELETE
+  try {
+    const { id } = req.params;
+
+    const exerciseActivity = await exerciseActivityModel.findByIdAndDelete(id);
+    if (!exerciseActivity) {
+      res.status(404).send({
+        success: false,
+        message: 'Exercise Activity not found',
+      });
+      return;
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'Exercise Activity deleted successfully',
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
 export default {
   getExerciseActivity,
   createExerciseActivity,
   getExerciseActivityById,
   getExerciseActivityByUserId,
   updateExerciseActivity,
+  deleteExerciseActivity,
 };
