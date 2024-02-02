@@ -1,11 +1,19 @@
 import userModel from './user.model.js';
+import bcrypt from 'bcrypt';
 
 const createUser = async (req, res) => {
+  // POST
   try {
     const { userName, email, password, phone } = req.body;
-    const user = await userModel.create({ userName, email, password, phone });
-    user.password = undefined;
 
+    // Hash password
+    const saltRounds = 15;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // create new user
+    const user = await userModel.create({ userName, email, password: hashedPassword, phone });
+    user.password = undefined;
+    console.log('create user success');
     res.status(201).send({
       success: true,
       message: 'User created successfully',
@@ -22,9 +30,17 @@ const createUser = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
+  // GET
   try {
-    const users = await userModel.find({});
-    users.forEach((user) => (user.password = undefined));
+    // const users = await userModel.find({});
+    // users.forEach((user) =>  user.password = undefined)
+    // const modifiedUsers = users.map(user => {
+    //   const {_id, userName, email, phone, avatar} = user.toJSON();
+    //   return { _id, userName, email, phone, avatar };
+    // });
+
+    const users = await userModel.find({}).select(' _id userName email phone avatar exercise_activities').lean();
+    console.log(users);
 
     res.status(200).send({
       success: true,
@@ -42,9 +58,10 @@ const getUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  //GET
   try {
     const { id } = req.params;
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).select(' _id userName email phone avatar')
     user.password = undefined;
 
     res.status(200).send({
@@ -54,20 +71,28 @@ const getUserById = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    res.status(404).send({
       success: false,
-      message: 'Internal server error',
+      message: 'Id not found',
       error: error,
     });
   }
 };
 
+const getUserByEmail = async (email) => {
+  const user = await userModel
+    .findOne({ email: email })
+    .select(' _id userName password email phone avatar exercise_activities');
+  return user;
+};
+
 const updateUser = async (req, res) => {
+  // POST
   try {
     const { id } = req.params;
     const { userName, email, phone, avatar } = req.body;
 
-    const user = await userModel.findById(id);
+    const user = await userModel.findById(id).select(' _id userName email phone avatar')
     if (!user) {
       res.status(404).send({
         success: false,
@@ -91,8 +116,6 @@ const updateUser = async (req, res) => {
 
     await user.save();
 
-    user.password = undefined;
-
     res.status(200).send({
       success: true,
       message: 'User updated successfully',
@@ -109,11 +132,16 @@ const updateUser = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
+  //PUT
   try {
     const { id } = req.params;
     const { password } = req.body;
 
-    const user = await userModel.findById(id);
+    // hash password
+    const saltRounds = 15;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const user = await userModel.findById(id).select(' _id userName email phone avatar')
     if (!user) {
       res.status(404).send({
         success: false,
@@ -123,7 +151,7 @@ const changePassword = async (req, res) => {
     }
 
     if (password) {
-      user.password = password;
+      user.password = hashedPassword;
     }
 
     await user.save();
@@ -143,6 +171,7 @@ const changePassword = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
+  //DELETE
   try {
     const { id } = req.params;
 
@@ -169,4 +198,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export default { createUser, getUsers, getUserById, updateUser, changePassword, deleteUser };
+export default { createUser, getUsers, getUserById, getUserByEmail, updateUser, changePassword, deleteUser };
