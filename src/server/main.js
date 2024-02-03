@@ -68,7 +68,6 @@ app.get('*', (req, res) => {
 
 // create webtoken
 
-
 mongo(); // To test and for connected with mongoDB
 ViteExpress.listen(app, config.port, () =>
   console.log(`Server is listening on port ${clc.yellow(config.port)}...\nSwagger API documentation: ${clc.blue(config.swagger_url+'/doc')}`));
