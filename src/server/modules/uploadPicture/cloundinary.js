@@ -9,6 +9,8 @@ cloudinary.config({
   api_secret: config.api_secret,
 });
 
+// upload to cloud middleware
+
 export async function uploadToCloudinary(req, res, next) {
   const fileBufferBase64 = Buffer.from(req.file.buffer).toString('base64');
   const base64File = `data:${req.file.mimetype};base64,${fileBufferBase64}`;
@@ -25,7 +27,7 @@ export const upload = multer({ storage });
 // upload photo function
 
 export const updatePhotoByUserID = async (req, res) => {
-  
+
   try {
     const { id } = req.params;
     console.log(req.params);
@@ -48,17 +50,6 @@ export const updatePhotoByUserID = async (req, res) => {
   }
 };
 
-// app.patch('/todos/:todoId/uploads', upload.single('image'), uploadToCloudinary, (req, res) => {
-//   const todoId = parseInt(req.params.todoId, 10);
-//   const updatedTodo = updateTodo(todoId, {
-//     imagePath: req.cloudinary.secure_url,
-//   });
 
-//   if (!updatedTodo) {
-//     res.status(404).json({ error: { message: 'todo not found' } });
-//   }
-
-//   res.json({ data: updatedTodo });
-// });
 
 
