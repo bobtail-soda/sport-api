@@ -12,6 +12,7 @@ import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { createJwt } from './utils/createJwt.js';
 import { cleanup } from './modules/clean.server/cleanup.js';
 
 const app = express();
@@ -56,13 +57,7 @@ app.get('*', (req, res) => {
 });
 
 // create webtoken
-function createJwt(user) {
-  const jwtSecretKey = process.env.JWT_SECRET_KEY;
-  const token = jwt.sign({ data: user }, jwtSecretKey, {
-    expiresIn: '12h',
-  });
-  return token;
-}
+
 
 mongo(); // To test and for connected with mongoDB
 ViteExpress.listen(app, config.port, () => console.log(`Server is listening on port ${clc.yellow(config.port)}...`));
