@@ -10,12 +10,10 @@ import mongo from './database/db.js';
 import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
-// step 1 use bcrypt
 import bcrypt from 'bcrypt';
-// step 2 use jsonwebtoken
 import jwt from 'jsonwebtoken';
-
-// console.log({ config });
+import { createJwt } from './utils/createJwt.js';
+import { cleanup } from './modules/clean.server/cleanup.js';
 
 const app = express();
 
@@ -54,19 +52,16 @@ app.post('/login', async (req, res) => {
     res.status(404).json({ error: 'User not found' });
   }
 });
-
 app.get('*', (req, res) => {
   res.sendStatus(404);
 });
 
 // create webtoken
-function createJwt(user) {
-  const jwtSecretKey = process.env.JWT_SECRET_KEY;
-  const token = jwt.sign({ data: user }, jwtSecretKey, {
-    expiresIn: '12h',
-  });
-  return token;
-}
+
 
 mongo(); // To test and for connected with mongoDB
 ViteExpress.listen(app, config.port, () => console.log(`Server is listening on port ${clc.yellow(config.port)}...`));
+
+// cleanup connection such as database
+process.on('SIGTERM', cleanup);
+process.on('SIGINT', cleanup);
