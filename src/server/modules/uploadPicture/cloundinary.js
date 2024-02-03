@@ -22,9 +22,11 @@ export async function uploadToCloudinary(req, res, next) {
 }
 
 const storage = multer.memoryStorage();
-export const upload = multer({ storage });
+// upload middleware with cloudinary as storage by multer upload func
+ const upload = multer({ storage });
+ export const uploadSingle = upload.single('image');
 
-// upload photo function
+// upload photo function to databases
 
 export const updatePhotoByUserID = async (req, res) => {
 
