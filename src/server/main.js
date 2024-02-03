@@ -15,6 +15,7 @@ import multer from 'multer';
 import userModel from './modules/users/user.model.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { cleanup } from './modules/clean.server/cleanup.js';
 
 const app = express();
 
@@ -54,7 +55,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-////////////////////////////////////////////////////////////
 // upload photo part
 cloudinary.config({
   cloud_name: config.cloud_name,
@@ -99,10 +99,8 @@ const updatePhotoByUserID = async (req, res) => {
   }
 };
 
-
-app.patch('/hey/:id', upload.single('image'), uploadToCloudinary, updatePhotoByUserID);
+app.patch('/upload/:id', upload.single('image'), uploadToCloudinary, updatePhotoByUserID);
 ////////////////////////////////////////////////////////////
-
 
 app.get('*', (req, res) => {
   res.sendStatus(404);
@@ -119,3 +117,7 @@ function createJwt(user) {
 
 mongo(); // To test and for connected with mongoDB
 ViteExpress.listen(app, config.port, () => console.log(`Server is listening on port ${clc.yellow(config.port)}...`));
+
+// cleanup connection such as database
+process.on('SIGTERM', cleanup);
+process.on('SIGINT', cleanup);
