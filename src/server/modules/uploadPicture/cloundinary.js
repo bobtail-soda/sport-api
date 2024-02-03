@@ -1,7 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { config } from 'dotenv';
+import { config } from '../../config/config.js'
 import userModel from '../users/user.model.js';
 import multer from 'multer';
+import AppError from '../../utils/appError.js';
 
 cloudinary.config({
   cloud_name: config.cloud_name,
@@ -15,15 +16,28 @@ export async function uploadToCloudinary(req, res, next) {
   const fileBufferBase64 = Buffer.from(req.file.buffer).toString('base64');
   const base64File = `data:${req.file.mimetype};base64,${fileBufferBase64}`;
   req.cloudinary = await cloudinary.uploader.upload(base64File, {
-    resource_type: 'auto',
+    resource_type: 'image',
   });
 
   next();
 }
 
-const storage = multer.memoryStorage();
+// multer config
+const multerStorage = multer.memoryStorage();
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
 // upload middleware with cloudinary as storage by multer upload func
- const upload = multer({ storage });
+
  export const uploadSingle = upload.single('image');
 
 // upload photo function to databases
