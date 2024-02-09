@@ -15,6 +15,9 @@ import jwt from 'jsonwebtoken';
 import { createJwt } from './utils/createJwt.js';
 import { cleanup } from './modules/clean.server/cleanup.js';
 
+//swagger
+import swaggerUi from 'swagger-ui-express';
+import swaggerFile from '../../swagger-output.json' assert { type: 'json' };
 const app = express();
 
 app.use(helmet());
@@ -23,12 +26,15 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/users', userRouter);
 app.use('/api/exercise-activities', exerciseActivityRouter);
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.get('/hello', (req, res) => {
+  // #swagger.tags = ['Health Check']
   res.send('Hello Health check!');
 });
 
 app.post('/login', async (req, res) => {
+  // #swagger.tags = ['Authentication']
   try {
     const email = req.body.email;
     const password = req.body.password;
@@ -60,7 +66,8 @@ app.get('*', (req, res) => {
 
 
 mongo(); // To test and for connected with mongoDB
-ViteExpress.listen(app, config.port, () => console.log(`Server is listening on port ${clc.yellow(config.port)}...`));
+ViteExpress.listen(app, config.port, () =>
+  console.log(`Server is listening on port ${clc.yellow(config.port)}...\nSwagger API documentation: ${clc.blue(config.swagger_url+'/doc')}`));
 
 // cleanup connection such as database
 process.on('SIGTERM', cleanup);
