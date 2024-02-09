@@ -61,7 +61,7 @@ const getUserById = async (req, res) => {
   //GET
   try {
     const { id } = req.params;
-    const user = await userModel.findById(id).select(' _id userName email phone avatar')
+    const user = await userModel.findById(id).select(' _id userName email phone avatar date_of_birth gender height weight')
     user.password = undefined;
 
     res.status(200).send({
