@@ -369,6 +369,25 @@
         }
       }
     },
+    "/api/upload-image/": {
+      "post": {
+        "tags": [
+          "Upload Image"
+        ],
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/api/exercise-activities/": {
       "get": {
         "tags": [
@@ -633,47 +652,13 @@
     "/": {
       "post": {
         "tags": [
-          "Exercise Activity"
+          "Upload Image"
         ],
         "description": "",
-        "parameters": [
-          {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "activity_type_id": {
-                  "example": "any"
-                },
-                "caption": {
-                  "example": "any"
-                },
-                "description": {
-                  "example": "any"
-                },
-                "hour": {
-                  "example": "any"
-                },
-                "minute": {
-                  "example": "any"
-                },
-                "date": {
-                  "example": "any"
-                },
-                "image": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "201": {
             "description": "Created"
           },

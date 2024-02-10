@@ -1,8 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { config } from '../../config/config.js'
-import userModel from '../users/user.model.js';
+import { config } from '../config/config.js'
+import userModel from '../modules/users/user.model.js';
 import multer from 'multer';
-import AppError from '../../utils/appError.js';
+import AppError from './appError.js';
 
 cloudinary.config({
   cloud_name: config.cloud_name,
@@ -67,7 +67,6 @@ export const updatePhotoByUserID = async (req, res) => {
     });
   }
 };
-
 
 
 
