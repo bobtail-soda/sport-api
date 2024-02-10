@@ -2,6 +2,7 @@ import userModel from './user.model.js';
 import bcrypt from 'bcrypt';
 
 const createUser = async (req, res) => {
+  // #swagger.tags = ['Users']
   // POST
   try {
     const { userName, email, password, phone } = req.body;
@@ -30,6 +31,7 @@ const createUser = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
+  // #swagger.tags = ['Users']
   // GET
   try {
     // const users = await userModel.find({});
@@ -58,6 +60,7 @@ const getUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  // #swagger.tags = ['Users']
   //GET
   try {
     const { id } = req.params;
@@ -87,6 +90,7 @@ const getUserByEmail = async (email) => {
 };
 
 const updateUser = async (req, res) => {
+  // #swagger.tags = ['Users']
   // POST
   try {
     const { id } = req.params;
@@ -132,6 +136,7 @@ const updateUser = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
+  // #swagger.tags = ['Users']
   //PUT
   try {
     const { id } = req.params;
@@ -171,6 +176,7 @@ const changePassword = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
+  // #swagger.tags = ['Users']
   //DELETE
   try {
     const { id } = req.params;

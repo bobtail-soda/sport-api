@@ -3,6 +3,7 @@ import exerciseActivityModel from './exerciseActivity.model.js';
 // import auth from '../users/user.auth.js'; //TODO: uncomment when get code from branch 'hashPassword'
 
 const getExerciseActivity = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
   // GET
   try {
     const exerciseActivities = await exerciseActivityModel.find({});
@@ -24,6 +25,7 @@ const getExerciseActivity = async (req, res) => {
 };
 
 const getExerciseActivityById = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
   try {
     const { id } = req.params;
 
@@ -47,6 +49,7 @@ const getExerciseActivityById = async (req, res) => {
 };
 
 const getExerciseActivityByUserId = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
   // GET
   try {
     console.log('start: getExerciseActivityByUserId');
@@ -66,19 +69,6 @@ const getExerciseActivityByUserId = async (req, res) => {
 
     console.log('docs: ', docs);
 
-    // const xxx = exerciseActivities.toString();
-    // console.log('xxx:', xxx.exercise_activities);
-
-    // const exerciseActivityIds = exerciseActivities.map((exerciseActivity) => exerciseActivity._id);
-    // console.log("exerciseActivityIds: ", exerciseActivityIds);
-
-    // // exerciseActivities.forEach((exerciseActivity) => (exerciseActivity._id = undefined));
-    // const result = `${exerciseActivityIds}`;
-    // // console.log('exerciseActivity after loop result: ', exerciseActivityIds.toString());
-    // console.log('exerciseActivity after loop result: ', result);
-
-    // const exerciseActivityResult = await exerciseActivityModel.findById(result);
-
     res.status(200).send({
       success: true,
       message: `Exercise Activity by ${user_id} get successfully`,
@@ -95,6 +85,7 @@ const getExerciseActivityByUserId = async (req, res) => {
 };
 
 const createExerciseActivity = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
   // POST
   try {
     const { activity_type_id, caption, description, hour, minute, date, image } = req.body;
@@ -150,6 +141,7 @@ const createExerciseActivity = async (req, res) => {
 };
 
 const updateExerciseActivity = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
   try {
     const { id } = req.params;
     const { activity_type_id, caption, description, hour, minute, date, image } = req.body;
@@ -207,6 +199,7 @@ const updateExerciseActivity = async (req, res) => {
 };
 
 const deleteExerciseActivity = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
   //DELETE
   try {
     const { id } = req.params;

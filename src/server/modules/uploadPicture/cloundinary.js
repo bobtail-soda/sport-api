@@ -13,6 +13,7 @@ cloudinary.config({
 // upload to cloud middleware
 
 export async function uploadToCloudinary(req, res, next) {
+  // #swagger.tags = ['Upload Image']
   const fileBufferBase64 = Buffer.from(req.file.buffer).toString('base64');
   const base64File = `data:${req.file.mimetype};base64,${fileBufferBase64}`;
   req.cloudinary = await cloudinary.uploader.upload(base64File, {
@@ -43,6 +44,7 @@ const upload = multer({
 // upload photo function to databases
 
 export const updatePhotoByUserID = async (req, res) => {
+  // #swagger.tags = ['User']
 
   try {
     const { id } = req.params;
