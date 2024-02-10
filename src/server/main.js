@@ -10,6 +10,7 @@ import mongo from './database/db.js';
 import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
+import uploadImageRouter from './modules/uploadImage/uploadImage.router.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { createJwt } from './utils/createJwt.js';
@@ -25,6 +26,7 @@ app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 app.use('/api/users', userRouter);
+app.use('/api/upload-image', uploadImageRouter);
 app.use('/api/exercise-activities', exerciseActivityRouter);
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
