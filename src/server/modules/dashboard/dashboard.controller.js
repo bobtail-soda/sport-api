@@ -80,31 +80,42 @@ const getActivitiesTypeByUserId = async (req, res) => {
   // #swagger.tags = ['Dashboard']
   // GET
   try {
+    const { user_id } = req.params;
+
+    const result = await userModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(user_id) }, // ใช้ user_id จาก request params
+      },
+      {
+        $lookup: {
+          from: 'exercise-activities',
+          localField: 'exercise_activities._id',
+          foreignField: '_id',
+          as: 'activities',
+        },
+      },
+      {
+        $unwind: '$activities',
+      },
+      {
+        $group: {
+          _id: '$activities.activity_type_id',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          activity_type_name: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
     //mock data result
     const data = {
       date_range: 'Weekly',
-      chart_datas: [
-        {
-          activity_type: 'Running',
-          count: 1,
-        },
-        {
-          activity_type: 'Yoga',
-          count: 2,
-        },
-        {
-          activity_type: 'Weight training',
-          count: 1,
-        },
-        {
-          activity_type: 'Walking',
-          count: 1,
-        },
-        {
-          activity_type: 'Hiking',
-          count: 0,
-        },
-      ],
+      chart_datas: result
     };
 
     res.status(200).send({
