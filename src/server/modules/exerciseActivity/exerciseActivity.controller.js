@@ -9,7 +9,7 @@ const getExerciseActivity = async (req, res) => {
     const exerciseActivities = await exerciseActivityModel.find({});
     exerciseActivities.forEach((exerciseActivity) => (exerciseActivity.id = undefined));
 
-    res.status(200).send({
+    res.status(200).send({ 
       success: true,
       message: 'Exercise Activity get successfully',
       data: exerciseActivities,
