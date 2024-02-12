@@ -14,12 +14,15 @@ cloudinary.config({
 
 export async function uploadToCloudinary(req, res, next) {
   // #swagger.tags = ['Upload Image']
+  if (!req.file || !req.file.buffer) {
+    return next(new AppError('No file provided', 400));
+  }
   const fileBufferBase64 = Buffer.from(req.file.buffer).toString('base64');
   const base64File = `data:${req.file.mimetype};base64,${fileBufferBase64}`;
   req.cloudinary = await cloudinary.uploader.upload(base64File, {
     resource_type: 'image',
   });
-
+  console.log(req.cloudinary);
   next();
 }
 

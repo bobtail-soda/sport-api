@@ -64,7 +64,9 @@ const getUserById = async (req, res) => {
   //GET
   try {
     const { id } = req.params;
-    const user = await userModel.findById(id).select(' _id userName email phone avatar date_of_birth gender height weight')
+    const user = await userModel
+      .findById(id)
+      .select(' _id userName email phone avatar date_of_birth gender height weight');
     user.password = undefined;
 
     res.status(200).send({
@@ -96,7 +98,7 @@ const updateUser = async (req, res) => {
     const { id } = req.params;
     const { userName, email, phone, avatar } = req.body;
 
-    const user = await userModel.findById(id).select(' _id userName email phone avatar')
+    const user = await userModel.findById(id).select(' _id userName email phone avatar');
     if (!user) {
       res.status(404).send({
         success: false,
@@ -146,7 +148,7 @@ const changePassword = async (req, res) => {
     const saltRounds = 15;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const user = await userModel.findById(id).select(' _id userName email phone avatar')
+    const user = await userModel.findById(id).select(' _id userName email phone avatar');
     if (!user) {
       res.status(404).send({
         success: false,
