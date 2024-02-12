@@ -55,8 +55,8 @@ const getsummaryCardByUserId = async (req, res) => {
     });
     // Convert excess minutes to hours
     const sumData = {
-      totalHours: totalHours += Math.floor(totalMinutes / 60),
-      totalMinutes: totalMinutes %= 60,
+      totalHours: (totalHours += Math.floor(totalMinutes / 60)),
+      totalMinutes: (totalMinutes %= 60),
       totalDistance: result[0].totalDistance,
       totalCalories: result[0].totalCalories,
     };
@@ -115,7 +115,7 @@ const getActivitiesTypeByUserId = async (req, res) => {
     //mock data result
     const data = {
       date_range: 'Weekly',
-      chart_datas: result
+      chart_datas: result,
     };
 
     res.status(200).send({
@@ -133,145 +133,63 @@ const getActivitiesTypeByUserId = async (req, res) => {
   }
 };
 
+//มี data
 const getGraphSummaryDataByUserId = async (req, res) => {
   // #swagger.tags = ['Dashboard']
   // GET
   try {
-    //code here
+    const { user_id } = req.params;
 
-    //mock data result
+    const result = await userModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(user_id) },
+      },
+      {
+        $lookup: {
+          from: 'exercise-activities',
+          localField: 'exercise_activities._id',
+          foreignField: '_id',
+          as: 'activities',
+        },
+      },
+      {
+        $unwind: '$activities',
+      },
+      {
+        $group: {
+          _id: '$activities.activity_type_id',
+          count: { $sum: 1 },
+          totalCalories: { $sum: '$activities.calories' },
+          totalDuration: { $sum: { $add: [{ $multiply: ['$activities.hour', 60] }, '$activities.minute'] } },
+          totalDistance: { $sum: '$activities.distance' }
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          activity_type_name: '$_id',
+          calories: '$totalCalories',
+          duration: { $divide: ['$totalDuration', 60] }, // Convert total duration to hours
+          distance: '$totalDistance'
+        },
+      },
+    ]);
+
+    // Organize data for response
+    const series = [
+      { name: 'Calories', data: result.map(activity => activity.calories || 0) },
+      { name: 'Duration', data: result.map(activity => activity.duration || 0) },
+      { name: 'Distance', data: result.map(activity => activity.distance || 0) }
+    ];
+
     const data = {
       date_range: 'Weekly',
-      series: [
-        {
-          name: 'Calories',
-          data: [130, 80, 50, 90, 100, 60, 70],
-        },
-        {
-          name: 'Duration',
-          data: [60, 55, 20, 61, 56, 30, 50],
-        },
-        {
-          name: 'Distance',
-          data: [5, 4.5, 2.5, 4.8, 4.9, 3, 3.5],
-        },
-        // {
-        //   name: 'Calories',
-        //   data: [
-        //     {
-        //       x: 'Sun',
-        //       y: 130,
-        //     },
-        //     {
-        //       x: 'Mon',
-        //       y: 80,
-        //     },
-        //     {
-        //       x: 'Tue',
-        //       y: 50,
-        //     },
-        //     {
-        //       x: 'Wed',
-        //       y: 90,
-        //     },
-        //     {
-        //       x: 'Thu',
-        //       y: 100,
-        //     },
-        //     {
-        //       x: 'Fri',
-        //       y: 60,
-        //     },
-        //     {
-        //       x: 'Sat',
-        //       y: 70,
-        //     },
-        //     {
-        //       x: 'Sun',
-        //       y: 51,
-        //     },
-        //   ],
-        // },
-        // {
-        //   name: 'Duration',
-        //   data: [
-        //     {
-        //       x: 'Sun',
-        //       y: 60,
-        //     },
-        //     {
-        //       x: 'Mon',
-        //       y: 55,
-        //     },
-        //     {
-        //       x: 'Tue',
-        //       y: 20,
-        //     },
-        //     {
-        //       x: 'Wed',
-        //       y: 61,
-        //     },
-        //     {
-        //       x: 'Thu',
-        //       y: 56,
-        //     },
-        //     {
-        //       x: 'Fri',
-        //       y: 30,
-        //     },
-        //     {
-        //       x: 'Sat',
-        //       y: 50,
-        //     },
-        //     {
-        //       x: 'Sun',
-        //       y: 35,
-        //     },
-        //   ],
-        // },
-        // {
-        //   name: 'Distance',
-        //   data: [
-        //     {
-        //       x: 'Sun',
-        //       y: 5,
-        //     },
-        //     {
-        //       x: 'Mon',
-        //       y: 4.5,
-        //     },
-        //     {
-        //       x: 'Tue',
-        //       y: 2.5,
-        //     },
-        //     {
-        //       x: 'Wed',
-        //       y: 4.8,
-        //     },
-        //     {
-        //       x: 'Thu',
-        //       y: 4.9,
-        //     },
-        //     {
-        //       x: 'Fri',
-        //       y: 3,
-        //     },
-        //     {
-        //       x: 'Sat',
-        //       y: 3.5,
-        //     },
-        //     {
-        //       x: 'Sun',
-        //       y: 2,
-        //     },
-        //   ],
-        // },
-      ],
+      series: series
     };
 
     res.status(200).send({
       success: true,
-      message: 'get Health History By UserId successfully',
+      message: `Weekly Exercise Activity by ${user_id} get successfully`,
       data: data,
     });
   } catch (error) {
@@ -283,6 +201,114 @@ const getGraphSummaryDataByUserId = async (req, res) => {
     });
   }
 };
+
+//TODO: Send date_range to api but have no data
+// const getGraphSummaryDataByUserId = async (req, res) => {
+//   // #swagger.tags = ['Dashboard']
+//   // GET
+//   try {
+//     const { user_id } = req.params;
+//     const { date_range } = req.query;
+
+//     const matchQuery = { _id: new mongoose.Types.ObjectId(user_id) };
+
+//     // Determine the date range based on the query parameter
+//     if (date_range === 'today') {
+//       matchQuery['activities.createdAt'] = {
+//         $gte: new Date(new Date().setHours(0, 0, 0)),
+//         $lt: new Date(new Date().setHours(23, 59, 59)),
+//       };
+//     } else if (date_range === 'weekly') {
+//       // Calculate start and end of the week
+//       const currentDate = new Date(); //Mon
+//       console.log('currentDate: ', currentDate);
+//       const startOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay())); // -Mon
+//       console.log('startOfWeek: ', startOfWeek);
+//       const endOfWeek = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay() + 6));
+//       console.log('endOfWeek: ', endOfWeek);
+//       matchQuery['activities.createdAt'] = {
+//         $gte: new Date(startOfWeek.setHours(0, 0, 0)),
+//         $lt: new Date(endOfWeek.setHours(23, 59, 59)),
+//       };
+//     } else if (date_range === 'monthly') {
+//       const currentDate = new Date();
+//       const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+//       const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+//       matchQuery['activities.createdAt'] = {
+//         $gte: new Date(startOfMonth.setHours(0, 0, 0)),
+//         $lt: new Date(endOfMonth.setHours(23, 59, 59)),
+//       };
+//     } else if (date_range === 'yearly') {
+//       const currentDate = new Date();
+//       const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+//       const endOfYear = new Date(currentDate.getFullYear(), 11, 31);
+//       matchQuery['activities.createdAt'] = {
+//         $gte: new Date(startOfYear.setHours(0, 0, 0)),
+//         $lt: new Date(endOfYear.setHours(23, 59, 59)),
+//       };
+//     }
+
+//     const result = await userModel.aggregate([
+//       {
+//         $match: matchQuery,
+//       },
+//       {
+//         $lookup: {
+//           from: 'exercise-activities',
+//           localField: 'exercise_activities._id',
+//           foreignField: '_id',
+//           as: 'activities',
+//         },
+//       },
+//       {
+//         $unwind: '$activities',
+//       },
+//       {
+//         $group: {
+//           _id: '$activities.activity_type_id',
+//           count: { $sum: 1 },
+//           totalCalories: { $sum: '$activities.calories' },
+//           totalDuration: { $sum: { $add: [{ $multiply: ['$activities.hour', 60] }, '$activities.minute'] } },
+//           totalDistance: { $sum: '$activities.distance' },
+//         },
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           activity_type_name: '$_id',
+//           calories: '$totalCalories',
+//           duration: { $divide: ['$totalDuration', 60] }, // Convert total duration to hours
+//           distance: '$totalDistance',
+//         },
+//       },
+//     ]);
+
+//     // Organize data for response
+//     const series = [
+//       { name: 'Calories', data: result.map((activity) => activity.calories || 0) },
+//       { name: 'Duration', data: result.map((activity) => activity.duration || 0) },
+//       { name: 'Distance', data: result.map((activity) => activity.distance || 0) },
+//     ];
+
+//     const data = {
+//       date_range: date_range,
+//       series: series,
+//     };
+
+//     res.status(200).send({
+//       success: true,
+//       message: `${date_range.charAt(0).toUpperCase() + date_range.slice(1)} Exercise Activity by ${user_id} get successfully`,
+//       data: data,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({
+//       success: false,
+//       message: 'Internal server error',
+//       error: error,
+//     });
+//   }
+// };
 
 export default {
   getsummaryCardByUserId,
