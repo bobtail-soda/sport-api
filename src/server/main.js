@@ -45,6 +45,7 @@ app.post('/login', async (req, res) => {
 
     // Fetch user from database
     const user = await userController.getUserByEmail(email);
+    console.log(user);
     if (!user) {
       return res.status(400).json({ error: { message: 'Invalid email' } });
     }
@@ -66,7 +67,6 @@ app.get('*', (req, res) => {
   res.sendStatus(404);
 });
 
-// create webtoken
 
 mongo(); // To test and for connected with mongoDB
 ViteExpress.listen(app, config.port, () =>
