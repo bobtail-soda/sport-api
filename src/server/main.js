@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import clc from 'cli-color';
 import cors from 'cors';
 import 'dotenv/config';
@@ -7,12 +8,12 @@ import morgan from 'morgan';
 import ViteExpress from 'vite-express';
 import { config } from './config/config.js';
 import mongo from './database/db.js';
+
+import dashboardRouter from './modules/dashboard/dashboard.router.js';
 import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
+import uploadImageRouter from './modules/uploadImage/uploadImage.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
-import uploadImageRouter from './modules/uploadImage/uploadImage.router.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { createJwt } from './utils/createJwt.js';
 import { cleanup } from './modules/clean.server/cleanup.js';
 
@@ -28,6 +29,7 @@ app.use(express.json());
 app.use('/api/users', userRouter);
 app.use('/api/upload-image', uploadImageRouter);
 app.use('/api/exercise-activities', exerciseActivityRouter);
+app.use('/api/dashboard', dashboardRouter);
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.get('/hello', (req, res) => {
