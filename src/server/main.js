@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import clc from 'cli-color';
 import cors from 'cors';
 import 'dotenv/config';
@@ -15,7 +14,6 @@ import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.
 import uploadImageRouter from './modules/uploadImage/uploadImage.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
-import { createJwt } from './utils/createJwt.js';
 import { cleanup } from './modules/clean.server/cleanup.js';
 
 //swagger
