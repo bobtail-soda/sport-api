@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import clc from 'cli-color';
 import cors from 'cors';
 import 'dotenv/config';
@@ -7,11 +8,12 @@ import morgan from 'morgan';
 import ViteExpress from 'vite-express';
 import { config } from './config/config.js';
 import mongo from './database/db.js';
+
+import dashboardRouter from './modules/dashboard/dashboard.router.js';
 import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
+import uploadImageRouter from './modules/uploadImage/uploadImage.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { createJwt } from './utils/createJwt.js';
 import { cleanup } from './modules/clean.server/cleanup.js';
 
@@ -25,7 +27,9 @@ app.use(morgan('dev'));
 app.use(cors());
 app.use(express.json());
 app.use('/api/users', userRouter);
+app.use('/api/upload-image', uploadImageRouter);
 app.use('/api/exercise-activities', exerciseActivityRouter);
+app.use('/api/dashboard', dashboardRouter);
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 app.get('/hello', (req, res) => {
@@ -41,6 +45,7 @@ app.post('/login', async (req, res) => {
 
     // Fetch user from database
     const user = await userController.getUserByEmail(email);
+    console.log(user);
     if (!user) {
       return res.status(400).json({ error: { message: 'Invalid email' } });
     }
@@ -52,7 +57,7 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ error: { message: 'Invalid password' } });
     }
 
-    res.status(200).json({ token: createJwt(user) });
+    res.status(200).json({ token: createJwt(user), userId: user._id  });
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(404).json({ error: 'User not found' });
@@ -61,8 +66,6 @@ app.post('/login', async (req, res) => {
 app.get('*', (req, res) => {
   res.sendStatus(404);
 });
-
-// create webtoken
 
 
 mongo(); // To test and for connected with mongoDB

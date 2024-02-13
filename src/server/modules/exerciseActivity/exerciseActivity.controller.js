@@ -9,7 +9,7 @@ const getExerciseActivity = async (req, res) => {
     const exerciseActivities = await exerciseActivityModel.find({});
     exerciseActivities.forEach((exerciseActivity) => (exerciseActivity.id = undefined));
 
-    res.status(200).send({
+    res.status(200).send({ 
       success: true,
       message: 'Exercise Activity get successfully',
       data: exerciseActivities,
@@ -54,7 +54,7 @@ const getExerciseActivityByUserId = async (req, res) => {
   try {
     console.log('start: getExerciseActivityByUserId');
     //find user by id
-    const user_id = req.params.user_id;
+    const { user_id } = req.params;
     const user = await userModel.findById(user_id);
     console.log('user', user);
 
@@ -66,8 +66,6 @@ const getExerciseActivityByUserId = async (req, res) => {
         _id: { $in: exerciseActivities },
       })
       .exec();
-
-    console.log('docs: ', docs);
 
     res.status(200).send({
       success: true,
@@ -107,28 +105,30 @@ const createExerciseActivity = async (req, res) => {
     }
 
     //Step2:  create new exercise activity
-    const exerciseActivity = await exerciseActivityModel.create({
-      activity_type_id,
-      caption,
-      description,
-      hour,
-      minute,
-      date,
-      image,
+    const newExerciseActivity = new exerciseActivityModel({
+      activity_type_id: activity_type_id,
+      caption: caption,
+      description: description,
+      hour: hour,
+      minute: minute,
+      date: date,
+      image: image,
     });
-    console.log('create exercise activity success');
+    console.log('create new exercise activity success');
+
+    const savedExerciseActivity = await newExerciseActivity.save();
+
+    console.log('savedExerciseActivity: ', savedExerciseActivity);
 
     //Step3: update 'exercise_activity_id' to 'users'
-    const exercise_activity_id = exerciseActivity._id;
-    if (exercise_activity_id) {
-      user.exercise_activities.push(exercise_activity_id);
-      user.save();
-      console.log('add exercise activity id to users success');
-    }
+    user.exercise_activities.push(savedExerciseActivity._id);
+    await user.save();
+    console.log('add exercise activity id to users success');
+
     res.status(201).send({
       success: true,
       message: 'Exercise activity created successfully',
-      data: exerciseActivity,
+      data: savedExerciseActivity,
     });
   } catch (error) {
     console.log(error);

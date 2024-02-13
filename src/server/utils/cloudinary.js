@@ -1,8 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
-import { config } from '../../config/config.js'
-import userModel from '../users/user.model.js';
+import { config } from '../config/config.js'
+import userModel from '../modules/users/user.model.js';
 import multer from 'multer';
-import AppError from '../../utils/appError.js';
+import AppError from './appError.js';
 
 cloudinary.config({
   cloud_name: config.cloud_name,
@@ -14,12 +14,15 @@ cloudinary.config({
 
 export async function uploadToCloudinary(req, res, next) {
   // #swagger.tags = ['Upload Image']
+  if (!req.file || !req.file.buffer) {
+    return next(new AppError('No file provided', 400));
+  }
   const fileBufferBase64 = Buffer.from(req.file.buffer).toString('base64');
   const base64File = `data:${req.file.mimetype};base64,${fileBufferBase64}`;
   req.cloudinary = await cloudinary.uploader.upload(base64File, {
     resource_type: 'image',
   });
-
+  console.log(req.cloudinary);
   next();
 }
 
@@ -67,7 +70,6 @@ export const updatePhotoByUserID = async (req, res) => {
     });
   }
 };
-
 
 
 

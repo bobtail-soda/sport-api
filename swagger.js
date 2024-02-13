@@ -29,6 +29,10 @@ const doc = {
       description: 'Upload image to Cloudinary Endpoint',
     },
     {
+      name: 'Dashboard',
+      description: 'Dashboard Endpoint',
+    },
+    {
       name: 'Health Check',
       description: 'Server Health Check Endpoint',
     },
@@ -49,7 +53,9 @@ const routes = [
   './src/server/main.js',
   './src/server/modules/users/user.router.js',
   './src/server/modules/exerciseActivity/exerciseActivity.router.js',
-  './src/server/modules/uploadPicture/cloundinary.js',
+  './src/server/modules/uploadImage/uploadImage.router.js',
+  './src/server/modules/dashboard/dashboard.router.js',
+  './src/server/utils/cloudinary.js',
 ];
 
 /* NOTE: If you are using the express Router, you must pass in the 'routes' only the
