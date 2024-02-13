@@ -40,6 +40,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '50',
     },
+    verificationCode: {
+      type: String,
+    },
     exercise_activities: {
       type: [{ String }],
     },

@@ -8,6 +8,7 @@ export const config = {
   api_secret: process.env.CLOUDINARY_SECRET,
 
   swagger_url: process.env.SWAGGER_URL,
+  gmail_passcode: process.env.GMAIL_PASSCODE,
 };
 
 // export default config;
