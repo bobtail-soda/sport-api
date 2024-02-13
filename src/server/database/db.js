@@ -5,7 +5,7 @@ async function mongooseConnection() {
   try {
     // Connect to the MongoDB cluster
     const mongoAtlasUri = config.mongodbUri;
-    await mongoose.connect(mongoAtlasUri, { useNewUrlParser: true, useUnifiedTopology: true, dbName: 'sport-db' });
+    await mongoose.connect(mongoAtlasUri, { dbName: 'sport-db' });
     console.log('Mongoose is connected');
   } catch (e) {
     console.log('Mongoose error: ' + e.message);

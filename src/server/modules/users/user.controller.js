@@ -2,6 +2,7 @@ import userModel from './user.model.js';
 import bcrypt from 'bcrypt';
 
 const createUser = async (req, res) => {
+  // #swagger.tags = ['Users']
   // POST
   try {
     const { userName, email, password, phone } = req.body;
@@ -30,6 +31,7 @@ const createUser = async (req, res) => {
 };
 
 const getUsers = async (req, res) => {
+  // #swagger.tags = ['Users']
   // GET
   try {
     // const users = await userModel.find({});
@@ -58,10 +60,13 @@ const getUsers = async (req, res) => {
 };
 
 const getUserById = async (req, res) => {
+  // #swagger.tags = ['Users']
   //GET
   try {
     const { id } = req.params;
-    const user = await userModel.findById(id).select(' _id userName email phone avatar')
+    const user = await userModel
+      .findById(id)
+      .select(' _id userName email phone avatar date_of_birth gender height weight');
     user.password = undefined;
 
     res.status(200).send({
@@ -87,12 +92,13 @@ const getUserByEmail = async (email) => {
 };
 
 const updateUser = async (req, res) => {
+  // #swagger.tags = ['Users']
   // POST
   try {
     const { id } = req.params;
     const { userName, email, phone, avatar } = req.body;
 
-    const user = await userModel.findById(id).select(' _id userName email phone avatar')
+    const user = await userModel.findById(id).select(' _id userName email phone avatar');
     if (!user) {
       res.status(404).send({
         success: false,
@@ -132,6 +138,7 @@ const updateUser = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
+  // #swagger.tags = ['Users']
   //PUT
   try {
     const { id } = req.params;
@@ -141,7 +148,7 @@ const changePassword = async (req, res) => {
     const saltRounds = 15;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    const user = await userModel.findById(id).select(' _id userName email phone avatar')
+    const user = await userModel.findById(id).select(' _id userName email phone avatar');
     if (!user) {
       res.status(404).send({
         success: false,
@@ -171,6 +178,7 @@ const changePassword = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
+  // #swagger.tags = ['Users']
   //DELETE
   try {
     const { id } = req.params;

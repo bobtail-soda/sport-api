@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
+import { config } from '../../config/config.js';
 
 export const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const jwtSecretKey = process.env.JWT_SECRET_KEY;
+  const jwtSecretKey = config.jwt_secret_key;
 
   if (!authHeader || !authHeader.startsWith('Bearer')) {
     return res.status(401).json({ error: { message: 'Unauthorized' } });
