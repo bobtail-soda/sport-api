@@ -45,45 +45,26 @@ const login = async (req, res) => {
 
 // Endpoint for Forgot Password
 const forgotPassword = async (req, res) => {
-  //   const { email } = req.body;
+  try{
+    const { email } = req.body;
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
 
-  //   // Generate random 6-digit verification code
-  //   const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    sendVerificationEmail(email, code); // Send email with verification code
 
-  //   const user = await userController.getUserByEmail(email)
-  //   if (!user) {
-  //     res.status(404).send({
-  //       success: false,
-  //       message: 'User not found',
-  //     });
-  //     return;
-  //   }
+    await userModel.updateOne({ email }, { verificationCode: code }); // Update code in database
 
-  //   // Save user to database
-  //   user.email = email;
-  //   user.verificationCode = verificationCode;
-  //   await user.save();
-
-  //   // Send verification email
-  //   const msg = {
-  //     to: email,
-  //     from: 'bobtail.dev@gmail.com',
-  //     subject: 'Verification Code',
-  //     text: `Your verification code is: ${verificationCode}`,
-  //   };
-  //   try {
-  //     await sgMail.send(msg);
-  //     res.send('Verification email sent!');
-  //   } catch (error) {
-  //     console.error('Error sending verification email:', error);
-  //     res.status(500).send('Error sending verification email');
-  //   }
-
-  const { email } = req.body;
-  const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-  sendVerificationEmail(email, code); // Send email with verification code
-  await userModel.updateOne({ email }, { verificationCode: code }); // Update code in database
-  res.send('Verification code sent to your email.');
+    res.status(200).send({
+      success: true,
+      message: `Verification code sent to ${email}.`,
+    });
+  }catch (error) {
+    res.status(404).json({ error: error });
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
 };
 
 // Endpoint for verifying the code
@@ -128,4 +109,37 @@ function sendVerificationEmail(email, code) {
   });
 }
 
-export default { login, forgotPassword, verify };
+// Endpoint for resend Code
+const resendCode = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: { message: 'Invalid email' } });
+    }
+
+    if (user.verificationCode) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
+      sendVerificationEmail(email, code); // Send email with verification code
+      await userModel.updateOne({ email }, { verificationCode: code }); // Update code in database
+
+      res.status(200).send({
+        success: true,
+        message: `Resend verification code to ${email} successfully.`,
+      });
+    } else {
+      return res.status(400).json({ error: { message: 'Verification code does not exist.' } });
+    }
+
+  } catch (error) {
+    res.status(404).json({ error: error });
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
+export default { login, forgotPassword, verify, resendCode };
