@@ -1,9 +1,11 @@
 import express from 'express';
-import authenController from './authentication.controller.js';
+import authController from './authentication.controller.js';
 
 const router = express.Router();
-router.post('/login', authenController.login);
-router.post('/forgot-password', authenController.forgotPassword);
-router.post('/verify', authenController.verify);
+router.post('/login', authController.login);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/verify', authController.verify);
+router.post('/resend-code', authController.resendCode);
+router.patch('/:user_id/create-new-password', authController.createNewPassword);
 
 export default router;
