@@ -70,9 +70,16 @@ const forgotPassword = async (req, res) => {
 // Endpoint for verifying the code
 const verify = async (req, res) => {
   const { email, code } = req.body;
-  const user = await userModel.findOne({ email, verificationCode: code });
+
+  const user = await userController.getUserByEmail(email);
+
+  // const user = await userModel.findOne({ email, verificationCode: code }).select(' _id userName email');
   if (user) {
-    res.send('Verification successful');
+    res.status(200).send({
+      success: true,
+      message: 'Verification successfully.',
+      data: user._id
+    });
     // You can handle login logic here
   } else {
     res.send('Invalid verification code');
@@ -114,7 +121,8 @@ const resendCode = async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await userModel.findOne({ email });
+    const user = await userController.getUserByEmail(email);
+    
     if (!user) {
       return res.status(400).json({ error: { message: 'Invalid email' } });
     }
@@ -142,4 +150,44 @@ const resendCode = async (req, res) => {
   }
 };
 
-export default { login, forgotPassword, verify, resendCode };
+const createNewPassword = async (req, res) => {
+  // #swagger.tags = ['Users']
+  //PUT
+  try {
+    const { user_id } = req.params;
+    const { password } = req.body;
+
+    // hash password
+    const saltRounds = 15;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    const user = await userModel.findById(user_id).select(' _id userName email');
+    if (!user) {
+      res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    if (password) {
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: 'User create new password successfully',
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error,
+    });
+  }
+};
+
+export default { login, forgotPassword, verify, resendCode, createNewPassword };
