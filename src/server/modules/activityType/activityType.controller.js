@@ -148,9 +148,34 @@ const deleteActivityType = async (req, res) => {
   }
 };
 
+const getActivityTypeById = async (req, res) => {
+  // #swagger.tags = ['Activity Type']
+  try {
+    const { id } = req.params;
+
+    const activityType = await activityTypeModel
+      .findById(id)
+      .select(' _id name met');
+
+    res.status(200).send({
+      success: true,
+      message: `Exercise Activity by ${id} get successfully`,
+      data: activityType,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error: error,
+    });
+  }
+};
+
 export default {
   getActivityType,
   createActivityType,
   updateActivityType,
   deleteActivityType,
+  getActivityTypeById,
 };
