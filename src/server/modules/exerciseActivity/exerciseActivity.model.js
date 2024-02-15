@@ -25,7 +25,6 @@ const exerciseActivitySchema = new mongoose.Schema(
     distance: {
       type: Number,
       required: [true, 'distance is required'],
-      default: '20',
     },
     calories: {
       type: Number,
