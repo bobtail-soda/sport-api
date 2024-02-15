@@ -96,9 +96,11 @@ const updateUser = async (req, res) => {
   // POST
   try {
     const { id } = req.params;
-    const { userName, email, phone, avatar } = req.body;
+    const { userName, email, phone, avatar, date_of_birth, gender, height, weight } = req.body;
 
-    const user = await userModel.findById(id).select(' _id userName email phone avatar');
+    const user = await userModel
+      .findById(id)
+      .select(' _id userName email phone avatar date_of_birth gender height weight');
     if (!user) {
       res.status(404).send({
         success: false,
@@ -118,6 +120,18 @@ const updateUser = async (req, res) => {
     }
     if (avatar) {
       user.avatar = avatar;
+    }
+    if (date_of_birth) {
+      user.date_of_birth = date_of_birth;
+    }
+    if (gender) {
+      user.gender = gender;
+    }
+    if (height) {
+      user.height = height;
+    }
+    if (weight) {
+      user.weight = weight;
     }
 
     await user.save();
