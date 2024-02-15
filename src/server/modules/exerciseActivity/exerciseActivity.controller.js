@@ -9,7 +9,7 @@ const getExerciseActivity = async (req, res) => {
     const exerciseActivities = await exerciseActivityModel.find({});
     exerciseActivities.forEach((exerciseActivity) => (exerciseActivity.id = undefined));
 
-    res.status(200).send({ 
+    res.status(200).send({
       success: true,
       message: 'Exercise Activity get successfully',
       data: exerciseActivities,
@@ -31,7 +31,7 @@ const getExerciseActivityById = async (req, res) => {
 
     const exerciseActivity = await exerciseActivityModel
       .findById(id)
-      .select(' _id caption description hour minute date image activity_type_id');
+      .select(' _id caption description hour minute distance calories date image activity_type_id');
 
     res.status(200).send({
       success: true,
@@ -86,7 +86,7 @@ const createExerciseActivity = async (req, res) => {
   // #swagger.tags = ['Exercise Activity']
   // POST
   try {
-    const { activity_type_id, caption, description, hour, minute, date, image } = req.body;
+    const { activity_type_id, caption, description, hour, minute, distance, calories, date, image } = req.body;
 
     //Step1: get user from token
     /**
@@ -111,6 +111,8 @@ const createExerciseActivity = async (req, res) => {
       description: description,
       hour: hour,
       minute: minute,
+      distance: distance,
+      calories: calories,
       date: date,
       image: image,
     });
@@ -203,8 +205,9 @@ const deleteExerciseActivity = async (req, res) => {
   //DELETE
   try {
     const { id } = req.params;
-
+    //remove from exerciseActivity collection
     const exerciseActivity = await exerciseActivityModel.findByIdAndDelete(id);
+
     if (!exerciseActivity) {
       res.status(404).send({
         success: false,
@@ -212,6 +215,19 @@ const deleteExerciseActivity = async (req, res) => {
       });
       return;
     }
+
+    //remove from user collection
+    const user_id = req.user.data._id; //get User Id from Token
+    const user = await userModel.findById(user_id);
+    if (!user) {
+      res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+    user.exercise_activities.pull(id);
+    await user.save();
 
     res.status(200).send({
       success: true,
