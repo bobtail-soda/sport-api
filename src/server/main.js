@@ -11,6 +11,7 @@ import mongo from './database/db.js';
 import dashboardRouter from './modules/dashboard/dashboard.router.js';
 import authenRouter from './modules/authentication/authentication.router.js';
 import exerciseActivityRouter from './modules/exerciseActivity/exerciseActivity.router.js';
+import activityTypeRouter from './modules/activityType/activityType.router.js';
 import uploadImageRouter from './modules/uploadImage/uploadImage.router.js';
 import userController from './modules/users/user.controller.js';
 import userRouter from './modules/users/user.router.js';
@@ -32,6 +33,8 @@ app.use('/api/upload-image', uploadImageRouter);
 app.use('/api/exercise-activities', exerciseActivityRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/authen', authenRouter);
+app.use('/api/activity-type', activityTypeRouter);
+
 
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.use(bodyParser.urlencoded({ extended: true }));
