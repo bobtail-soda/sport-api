@@ -36,6 +36,10 @@ const doc = {
       name: 'Health Check',
       description: 'Server Health Check Endpoint',
     },
+    {
+      name: 'Activity Type',
+      description: 'Activity Type Endpoint',
+    },
   ],
   securityDefinitions: {
     Bearer: {

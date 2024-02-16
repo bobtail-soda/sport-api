@@ -63,7 +63,7 @@ const checkPassword = async (req, res) => {
 };
 // TODO: Route for signup
 // app.post('/signup', async (req, res) => {
-//     const { email } = req.body;
+//     const { fname,lname, email } = req.body;
 //     const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
 //     sendVerificationEmail(email, code); // Send email with verification code
 //     await User.create({ email, verificationCode: code }); // Save code to database
