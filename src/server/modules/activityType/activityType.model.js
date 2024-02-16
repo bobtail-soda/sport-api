@@ -13,4 +13,4 @@ const activityTypeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('ActivityType', activityTypeSchema, 'activitiy-type');
+export default mongoose.model('ActivityType', activityTypeSchema, 'activity-type');

@@ -157,7 +157,7 @@ const getActivitiesTypeByUserId = async (req, res) => {
 
     res.status(200).send({
       success: true,
-      message: 'get Activitie By UserId successfully',
+      message: 'get Activities By UserId successfully',
       data: data,
     });
   } catch (error) {
@@ -169,6 +169,7 @@ const getActivitiesTypeByUserId = async (req, res) => {
     });
   }
 };
+
 
 //มี data
 const getGraphSummaryDataByUserId = async (req, res) => {
