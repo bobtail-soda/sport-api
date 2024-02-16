@@ -8,5 +8,6 @@ router.post('/verify', authController.verify);
 router.post('/resend-code', authController.resendCode);
 router.patch('/:user_id/create-new-password', authController.createNewPassword);
 router.patch('/check-password/:user_id', authController.checkPassword);
+router.post('/signup', authController.signup);
 
 export default router;

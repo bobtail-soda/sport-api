@@ -2,6 +2,14 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
+    firstName: {
+      type: String,
+      required: [true, 'first name is required'],
+    },
+    lastName: {
+      type: String,
+      required: [true, 'last name is required'],
+    },
     userName: {
       type: String,
       required: [true, 'user name is required'],
@@ -26,19 +34,15 @@ const userSchema = new mongoose.Schema(
     },
     date_of_birth: {
       type: Date,
-      default: '1992-01-30T16:04:14.313+00:00',
     },
     gender: {
       type: String,
-      default: 'Female',
     },
     height: {
       type: String,
-      default: '170',
     },
     weight: {
       type: String,
-      default: '50',
     },
     verificationCode: {
       type: String,
