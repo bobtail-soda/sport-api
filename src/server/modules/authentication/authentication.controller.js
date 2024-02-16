@@ -38,11 +38,11 @@ const login = async (req, res) => {
 const checkPassword = async (req, res) => {
   // #swagger.tags = ['Authentication']
   try {
-    const userId = req.params.userId
+    const {user_id} = req.params
     const  oldPassword = req.body.oldPassword;
 
     // Fetch user from database
-    const user = await userController.getUserById(userId);
+    const user = await userModel.findById(user_id)
     console.log(user);
     if (!user) {
       return res.status(400).json({ error: { message: 'Invalid email' } });
