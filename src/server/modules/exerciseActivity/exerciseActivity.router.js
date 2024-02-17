@@ -6,6 +6,7 @@ const router = express.Router();
 router.get('/', auth, exerciseActivityController.getExerciseActivity);
 router.get('/:id', auth, exerciseActivityController.getExerciseActivityById);
 router.get('/user/:user_id', auth, exerciseActivityController.getExerciseActivityByUserId);
+router.get('/favorite/:user_id', auth, exerciseActivityController.getFavotiteActivityTypeByUserId);
 router.post('/', auth, exerciseActivityController.createExerciseActivity);
 router.put('/:id', auth, exerciseActivityController.updateExerciseActivity);
 router.delete('/:id', auth, exerciseActivityController.deleteExerciseActivity);

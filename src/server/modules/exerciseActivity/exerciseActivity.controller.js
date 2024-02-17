@@ -105,6 +105,12 @@ const createExerciseActivity = async (req, res) => {
     }
 
     //Step2:  create new exercise activity
+
+    const dateParts = date.split('/');
+    const parsedDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+    parsedDate.setHours(parsedDate.getHours() + 7);    // Adjust the date to UTC+7
+    const timestamp = parsedDate.getTime();
+
     const newExerciseActivity = new exerciseActivityModel({
       activity_type_id: activity_type_id,
       caption: caption,
@@ -113,7 +119,7 @@ const createExerciseActivity = async (req, res) => {
       minute: minute,
       distance: distance,
       calories: calories,
-      date: date,
+      date: timestamp,
       image: image,
     });
     console.log('create new exercise activity success');
@@ -177,7 +183,11 @@ const updateExerciseActivity = async (req, res) => {
       exerciseActivity.minute = minute;
     }
     if (date) {
-      exerciseActivity.date = date;
+      const dateParts = date.split('/');
+      const parsedDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+      parsedDate.setHours(parsedDate.getHours() + 7);    // Adjust the date to UTC+7
+      const timestamp = parsedDate.getTime();
+      exerciseActivity.date = timestamp;
     }
     if (image) {
       exerciseActivity.image = image;
