@@ -66,7 +66,7 @@ const getUserById = async (req, res) => {
     const { id } = req.params;
     const user = await userModel
       .findById(id)
-      .select(' _id userName email phone avatar date_of_birth gender height weight');
+      .select(' _id firstName lastName userName email phone avatar date_of_birth gender height weight');
     user.password = undefined;
     user.date_of_birth = new Date(user.date_of_birth)
     console.log(user.date_of_birth);
