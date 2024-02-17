@@ -7,37 +7,37 @@ const getsummaryCardByUserId = async (req, res) => {
 
   try {
     const { user_id } = req.params;
-    const { range } = req.query;
+    const { date_range } = req.query;
     let startDate, endDate;
-    switch (range) {
-      case 'today':
-        // ช่วงรายชั่วโมง
-        startDate = new Date();
-        endDate = new Date();
-        startDate.setHours(startDate.getHours() - 1);
-        break;
-      case 'weekly':
-        // ช่วงย้อนหลัง 7 วัน
-        endDate = new Date();
-        startDate = new Date(endDate);
-        startDate.setDate(startDate.getDate() - 6);
-        break;
-      case 'monthly':
-        // ช่วงรายเดือน
-        const today = new Date();
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-        break;
-      case 'yearly':
-        // ช่วงรายปี
-        const currentYear = new Date().getFullYear();
-        startDate = new Date(currentYear, 0, 1);
-        endDate = new Date(currentYear, 11, 31);
-        break;
-      default:
-        // ค่าเริ่มต้นหากไม่ระบุ range
-        startDate = null;
-        endDate = null;
+    if (date_range === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0); // Set time to beginning of the day
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999); // Set time to end of the day
+
+      endDate = todayEnd
+      startDate = todayStart
+    } else if (date_range === 'weekly') {
+      // ช่วงย้อนหลัง 7 วัน
+      endDate = new Date();
+      startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 6);
+    } else if (date_range === 'monthly') {
+      // ช่วงรายเดือน
+      const today = new Date();
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    } else if (date_range === 'yearly') {
+      // ช่วงรายปี
+      const currentYear = new Date().getFullYear();
+      startDate = new Date(currentYear, 0, 1);
+      endDate = new Date(currentYear, 11, 31);
+    } else {
+      // Invalid date range provided
+      return res.status(400).send({
+        success: false,
+        message: 'Invalid date range provided',
+      });
     }
 
     const result = await userModel.aggregate([
@@ -60,7 +60,7 @@ const getsummaryCardByUserId = async (req, res) => {
       },
       {
         $group: {
-          _id: '$_id',
+          _id: '$activities.activity_type_id',
           totalHours: { $sum: '$activities.hour' },
           totalMinutes: { $sum: '$activities.minute' },
           totalDistance: { $sum: '$activities.distance' },
@@ -96,7 +96,7 @@ const getsummaryCardByUserId = async (req, res) => {
       totalHours: (totalHours += Math.floor(totalMinutes / 60)),
       totalMinutes: (totalMinutes %= 60),
       totalDistance: totalDistance,
-      totalCalories: totalDistance,
+      totalCalories: totalCalories.toFixed(2),
     };
 
     res.status(200).json({
