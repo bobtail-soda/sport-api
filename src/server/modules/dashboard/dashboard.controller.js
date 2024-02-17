@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import userModel from '../users/user.model.js';
 import activityTypeController from '../activityType/activityType.controller.js';
+import userModel from '../users/user.model.js';
 
 const getsummaryCardByUserId = async (req, res) => {
   // #swagger.tags = ['Dashboard']
@@ -95,8 +95,8 @@ const getsummaryCardByUserId = async (req, res) => {
     const sumData = {
       totalHours: (totalHours += Math.floor(totalMinutes / 60)),
       totalMinutes: (totalMinutes %= 60),
-      totalDistance: result[0].totalDistance,
-      totalCalories: result[0].totalCalories,
+      totalDistance: totalDistance,
+      totalCalories: totalDistance,
     };
 
     res.status(200).json({
@@ -121,9 +121,7 @@ const getActivitiesTypeByUserId = async (req, res) => {
     const { user_id } = req.params;
     const { date_range } = req.query; // Assuming date_range is passed as a query parameter
     console.log("donut_date_range: ", date_range)
-
-    let matchQuery = {}; // Initialize an empty match query
-
+    let startDate, endDate;
      // Based on the date range provided, adjust the matchQuery accordingly
     if (date_range === 'today') {
       const todayStart = new Date();
@@ -131,18 +129,23 @@ const getActivitiesTypeByUserId = async (req, res) => {
       const todayEnd = new Date();
       todayEnd.setHours(23, 59, 59, 999); // Set time to end of the day
 
-      matchQuery = {
-        'activities.createdAt': {
-          $gte: todayStart, // Today's start
-          $lte: todayEnd, // Today's end
-        },
-      };
+      endDate = todayEnd
+      startDate = todayStart
     } else if (date_range === 'weekly') {
-      // Logic for the weekly date range
+      // ช่วงย้อนหลัง 7 วัน
+      endDate = new Date();
+      startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 6);
     } else if (date_range === 'monthly') {
-      // Logic for the monthly date range
+      // ช่วงรายเดือน
+      const today = new Date();
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     } else if (date_range === 'yearly') {
-      // Logic for the yearly date range
+      // ช่วงรายปี
+      const currentYear = new Date().getFullYear();
+      startDate = new Date(currentYear, 0, 1);
+      endDate = new Date(currentYear, 11, 31);
     } else {
       // Invalid date range provided
       return res.status(400).send({
@@ -167,13 +170,16 @@ const getActivitiesTypeByUserId = async (req, res) => {
         $unwind: '$activities',
       },
       {
-        $match: matchQuery, // Apply the date range filter
+        $match: { 'activities.date': { $gte: startDate, $lte: endDate } }, // Filter activities within the specified date range
       },
       {
         $group: {
           _id: '$activities.activity_type_id',
           count: { $sum: 1 },
         },
+      },
+      {
+        $sort: { count: -1 } // เรียงลำดับ count จากมากไปน้อย
       },
       {
         $project: {
