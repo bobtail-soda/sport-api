@@ -32,7 +32,7 @@ const exerciseActivitySchema = new mongoose.Schema(
       default: '400',
     },
     date: {
-      type: String,
+      type: Date,
       required: [true, 'date is required'],
     },
     image: {
