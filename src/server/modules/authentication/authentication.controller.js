@@ -70,6 +70,105 @@ const checkPassword = async (req, res) => {
 //     res.send('Verification code sent to your email.');
 // });
 
+// signup
+
+// Endpoint for SignUp
+/* const signup = async (req, res) => {
+  // #swagger.tags = ['Authentication']
+  try {
+    const { firstName, lastName, email, userName, password } = req.body;
+    const user = await userController.getUserByEmail(email);
+    if (user) {
+      return res.status(400).json({ error: { message: 'Invalid email' } });
+    }
+
+    const saltRounds = 15;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
+    sendVerificationEmail(email, code); // Send email with verification code
+    user = await userModel.create({
+      firstName,
+      lastName,
+      email,
+      userName,
+      password: hashedPassword,
+      phone,
+      verificationCode: code,
+    }); // Save code to database
+    res.send ('verification code send to your email successfully')
+    res.status(201).send({
+          success: true,
+          message: 'Create new user successfully.',
+          data: user
+        });
+    } catch (error) {
+      res.status(404).json({ error: error });
+    }
+} */
+
+const signup = async (req, res) => {
+  try {
+    //step1: get data from body
+    const { firstName, lastName, userName, email, password, phone } = req.body;
+
+    // step2: check email user in db , must not duplicate
+    const isExisting = await userController.getUserByEmail(email);
+    console.log('check user email', isExisting);
+
+    if (isExisting === null) {
+      // step3: Hash password
+      const saltRounds = 15;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      //step4: // Generate 6-digit code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // step5: Save all data
+      const user = await userModel.create({
+        firstName,
+        lastName,
+        userName,
+        email,
+        password: hashedPassword,
+        phone,
+        verificationCode: code,
+      }); // Save code to database
+
+      // user = await userModel.create({ userName, email, password: hashedPassword, phone });
+      user.password = undefined;
+      // step6: Send email with verification code
+      await sendVerificationEmail(email, code);
+      console.log('Verification code sent to your email.');
+
+      console.log('create user success');
+      res.status(201).send({
+        success: true,
+        message: 'User created successfully',
+        data: user,
+      });
+    } else {
+      res.status(404).json({ error: 'Existing user email in Database' });
+    }
+  } catch (error) {
+    console.error('Error create new user:', error);
+    res.status(404).json({ error: 'Create new user failed.' });
+  }
+};
+
+/* const User = require('../models/User'); // Assuming you have a User model
+async function signup({ fname, lname, username, email, password }) {
+  try {
+
+    // Create a new user
+    const newUser = await User.create({ fname, lname, username, email, password });
+    return newUser;
+  } catch (error) {
+    // Handle any errors that occur during user creation
+    throw new Error('Error occurred while creating user: ' + error.message);
+  }
+}
+module.exports = signup; // Export the signup function */
+
 // Endpoint for Forgot Password
 const forgotPassword = async (req, res) => {
   try{
@@ -217,4 +316,4 @@ const createNewPassword = async (req, res) => {
   }
 };
 
-export default { login, forgotPassword, verify, resendCode, createNewPassword, checkPassword };
+export default { login, forgotPassword, verify, resendCode, createNewPassword, checkPassword, signup };
