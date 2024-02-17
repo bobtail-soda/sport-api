@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import userModel from '../users/user.model.js';
+import activityTypeController from '../activityType/activityType.controller.js';
 
 const getsummaryCardByUserId = async (req, res) => {
   // #swagger.tags = ['Dashboard']
@@ -118,6 +119,37 @@ const getActivitiesTypeByUserId = async (req, res) => {
   // GET
   try {
     const { user_id } = req.params;
+    const { date_range } = req.query; // Assuming date_range is passed as a query parameter
+    console.log("donut_date_range: ", date_range)
+
+    let matchQuery = {}; // Initialize an empty match query
+
+     // Based on the date range provided, adjust the matchQuery accordingly
+    if (date_range === 'today') {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0); // Set time to beginning of the day
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999); // Set time to end of the day
+
+      matchQuery = {
+        'activities.createdAt': {
+          $gte: todayStart, // Today's start
+          $lte: todayEnd, // Today's end
+        },
+      };
+    } else if (date_range === 'weekly') {
+      // Logic for the weekly date range
+    } else if (date_range === 'monthly') {
+      // Logic for the monthly date range
+    } else if (date_range === 'yearly') {
+      // Logic for the yearly date range
+    } else {
+      // Invalid date range provided
+      return res.status(400).send({
+        success: false,
+        message: 'Invalid date range provided',
+      });
+    }
 
     const result = await userModel.aggregate([
       {
@@ -135,6 +167,9 @@ const getActivitiesTypeByUserId = async (req, res) => {
         $unwind: '$activities',
       },
       {
+        $match: matchQuery, // Apply the date range filter
+      },
+      {
         $group: {
           _id: '$activities.activity_type_id',
           count: { $sum: 1 },
@@ -149,15 +184,32 @@ const getActivitiesTypeByUserId = async (req, res) => {
       },
     ]);
 
+    // Create an array of promises for each item in the result array
+    const promises = result.map(async (item) => {
+      try {
+        const activityTypeName = await activityTypeController.getActivityTypeNameById(item.activity_type_name);
+        return {
+          count: item.count,
+          activity_type_name: activityTypeName.name
+        };
+      } catch (error) {
+        console.error("Error getting activity type name:", error);
+        return item; // Return the item unchanged in case of an error
+      }
+    });
+
+    // Resolve all promises in parallel
+    const updatedResult = await Promise.all(promises);
+
     //mock data result
     const data = {
-      date_range: 'Weekly',
-      chart_datas: result,
+      date_range: date_range,
+      chart_datas: updatedResult, // Use the updatedResult here
     };
 
     res.status(200).send({
       success: true,
-      message: 'get Activitie By UserId successfully',
+      message: 'get Activities By UserId successfully',
       data: data,
     });
   } catch (error) {
@@ -170,13 +222,12 @@ const getActivitiesTypeByUserId = async (req, res) => {
   }
 };
 
-//มี data
 const getGraphSummaryDataByUserId = async (req, res) => {
   // #swagger.tags = ['Dashboard']
   // GET
   try {
     const { user_id } = req.params;
-
+    console.log(user_id)
     const result = await userModel.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(user_id) },

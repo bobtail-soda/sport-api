@@ -68,7 +68,8 @@ const getUserById = async (req, res) => {
       .findById(id)
       .select(' _id userName email phone avatar date_of_birth gender height weight');
     user.password = undefined;
-
+    user.date_of_birth = new Date(user.date_of_birth)
+    console.log(user.date_of_birth);
     res.status(200).send({
       success: true,
       message: 'User get successfully',
