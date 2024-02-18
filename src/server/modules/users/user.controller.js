@@ -66,9 +66,10 @@ const getUserById = async (req, res) => {
     const { id } = req.params;
     const user = await userModel
       .findById(id)
-      .select(' _id userName email phone avatar date_of_birth gender height weight');
+      .select(' _id firstName lastName userName email phone avatar date_of_birth gender height weight');
     user.password = undefined;
-
+    user.date_of_birth = new Date(user.date_of_birth)
+    console.log(user.date_of_birth);
     res.status(200).send({
       success: true,
       message: 'User get successfully',
@@ -87,7 +88,7 @@ const getUserById = async (req, res) => {
 const getUserByEmail = async (email) => {
   const user = await userModel
     .findOne({ email: email })
-    .select(' _id userName password email phone avatar exercise_activities');
+    .select(' _id userName password email phone avatar exercise_activities isVerified verificationCode');
   return user;
 };
 

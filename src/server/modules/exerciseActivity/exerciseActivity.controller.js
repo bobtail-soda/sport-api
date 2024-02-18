@@ -1,6 +1,8 @@
 import userModel from '../users/user.model.js';
 import exerciseActivityModel from './exerciseActivity.model.js';
 // import auth from '../users/user.auth.js'; //TODO: uncomment when get code from branch 'hashPassword'
+import mongoose from 'mongoose';
+import activityTypeController from '../activityType/activityType.controller.js';
 
 const getExerciseActivity = async (req, res) => {
   // #swagger.tags = ['Exercise Activity']
@@ -105,6 +107,12 @@ const createExerciseActivity = async (req, res) => {
     }
 
     //Step2:  create new exercise activity
+
+    const dateParts = date.split('/');
+    const parsedDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+    parsedDate.setHours(parsedDate.getHours() + 7);    // Adjust the date to UTC+7
+    const timestamp = parsedDate.getTime();
+
     const newExerciseActivity = new exerciseActivityModel({
       activity_type_id: activity_type_id,
       caption: caption,
@@ -113,7 +121,7 @@ const createExerciseActivity = async (req, res) => {
       minute: minute,
       distance: distance,
       calories: calories,
-      date: date,
+      date: timestamp,
       image: image,
     });
     console.log('create new exercise activity success');
@@ -177,7 +185,11 @@ const updateExerciseActivity = async (req, res) => {
       exerciseActivity.minute = minute;
     }
     if (date) {
-      exerciseActivity.date = date;
+      const dateParts = date.split('/');
+      const parsedDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+      parsedDate.setHours(parsedDate.getHours() + 7);    // Adjust the date to UTC+7
+      const timestamp = parsedDate.getTime();
+      exerciseActivity.date = timestamp;
     }
     if (image) {
       exerciseActivity.image = image;
@@ -243,6 +255,79 @@ const deleteExerciseActivity = async (req, res) => {
   }
 };
 
+const getFavotiteActivityTypeByUserId = async (req, res) => {
+  // #swagger.tags = ['Exercise Activity']
+  // GET
+  try {
+    const { user_id } = req.params;
+    const result = await userModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(user_id) }, // ใช้ user_id จาก request params
+      },
+      {
+        $lookup: {
+          from: 'exercise-activities',
+          localField: 'exercise_activities._id',
+          foreignField: '_id',
+          as: 'activities',
+        },
+      },
+      {
+        $unwind: '$activities',
+      },
+      {
+        $group: {
+          _id: '$activities.activity_type_id',
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 } // เรียงลำดับ count จากมากไปน้อย
+      },
+      {
+        $limit: 3 // เลือกเฉพาะ 3 อันดับแรก
+      },
+      {
+        $project: {
+          _id: 0,
+          activity_type_name: '$_id',
+          count: 1,
+        },
+      },
+    ]);
+
+    // Create an array of promises for each item in the result array
+    const promises = result.map(async (item) => {
+      try {
+        const activityTypeName = await activityTypeController.getActivityTypeNameById(item.activity_type_name);
+        return {
+          count: item.count,
+          activity_type_name: activityTypeName.name
+        };
+      } catch (error) {
+        console.error("Error getting activity type name:", error);
+        return item; // Return the item unchanged in case of an error
+      }
+    });
+
+    // Resolve all promises in parallel
+    const updatedResult = await Promise.all(promises);
+
+    res.status(200).send({
+      success: true,
+      message: 'get Favotite Activity Types By UserId successfully',
+      data: updatedResult,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'Internal server error',
+      error: error,
+    });
+  }
+};
+
 export default {
   getExerciseActivity,
   createExerciseActivity,
@@ -250,4 +335,5 @@ export default {
   getExerciseActivityByUserId,
   updateExerciseActivity,
   deleteExerciseActivity,
+  getFavotiteActivityTypeByUserId
 };

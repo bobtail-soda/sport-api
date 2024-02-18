@@ -172,10 +172,18 @@ const getActivityTypeById = async (req, res) => {
   }
 };
 
+const getActivityTypeNameById = async (id) => {
+  const activityTypeName = await activityTypeModel
+    .findById(id)
+    .select('name');
+  return activityTypeName;
+};
+
 export default {
   getActivityType,
   createActivityType,
   updateActivityType,
   deleteActivityType,
   getActivityTypeById,
+  getActivityTypeNameById
 };
