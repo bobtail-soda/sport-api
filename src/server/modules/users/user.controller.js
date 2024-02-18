@@ -88,7 +88,7 @@ const getUserById = async (req, res) => {
 const getUserByEmail = async (email) => {
   const user = await userModel
     .findOne({ email: email })
-    .select(' _id userName password email phone avatar exercise_activities');
+    .select(' _id userName password email phone avatar exercise_activities isVerified verificationCode');
   return user;
 };
 

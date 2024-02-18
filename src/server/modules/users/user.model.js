@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema(
     weight: {
       type: String,
     },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
     verificationCode: {
       type: String,
     },
