@@ -39,7 +39,6 @@ const login = async (req, res) => {
   }
 };
 
-
 const checkPassword = async (req, res) => {
   // #swagger.tags = ['Authentication']
   try {
@@ -66,50 +65,6 @@ const checkPassword = async (req, res) => {
     res.status(404).json({ error: 'User not found' });
   }
 };
-// TODO: Route for signup
-// app.post('/signup', async (req, res) => {
-//     const { fname,lname, email } = req.body;
-//     const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-//     sendVerificationEmail(email, code); // Send email with verification code
-//     await User.create({ email, verificationCode: code }); // Save code to database
-//     res.send('Verification code sent to your email.');
-// });
-
-// signup
-
-// Endpoint for SignUp
-/* const signup = async (req, res) => {
-  // #swagger.tags = ['Authentication']
-  try {
-    const { firstName, lastName, email, userName, password } = req.body;
-    const user = await userController.getUserByEmail(email);
-    if (user) {
-      return res.status(400).json({ error: { message: 'Invalid email' } });
-    }
-
-    const saltRounds = 15;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-    sendVerificationEmail(email, code); // Send email with verification code
-    user = await userModel.create({
-      firstName,
-      lastName,
-      email,
-      userName,
-      password: hashedPassword,
-      phone,
-      verificationCode: code,
-    }); // Save code to database
-    res.send ('verification code send to your email successfully')
-    res.status(201).send({
-          success: true,
-          message: 'Create new user successfully.',
-          data: user
-        });
-    } catch (error) {
-      res.status(404).json({ error: error });
-    }
-} */
 
 const signup = async (req, res) => {
   try {
@@ -139,7 +94,6 @@ const signup = async (req, res) => {
         verificationCode: code,
       }); // Save code to database
 
-      // user = await userModel.create({ userName, email, password: hashedPassword, phone });
       user.password = undefined;
       // step6: Send email with verification code
       await sendVerificationEmail(email, code);
@@ -160,34 +114,32 @@ const signup = async (req, res) => {
   }
 };
 
-/* const User = require('../models/User'); // Assuming you have a User model
-async function signup({ fname, lname, username, email, password }) {
-  try {
-
-    // Create a new user
-    const newUser = await User.create({ fname, lname, username, email, password });
-    return newUser;
-  } catch (error) {
-    // Handle any errors that occur during user creation
-    throw new Error('Error occurred while creating user: ' + error.message);
-  }
-}
-module.exports = signup; // Export the signup function */
-
 // Endpoint for Forgot Password
 const forgotPassword = async (req, res) => {
   try{
     const { email } = req.body;
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
 
-    sendVerificationEmail(email, code); // Send email with verification code
+    await sendVerificationEmail(email, code); // Send email with verification code
 
-    await userModel.updateOne({ email }, { isVerified: false }, { verificationCode: code }); // Update code in database
+    const user = await userController.getUserByEmail(email);
+
+    if (user) {
+
+    user.isVerified = false;
+    user.verificationCode = code;
+    await user.save();
 
     res.status(200).send({
       success: true,
       message: `Verification code sent to ${email}.`,
     });
+
+  } else {
+    res.send('Invalid email');
+  }
+
+
   }catch (error) {
     res.status(404).json({ error: error });
     res.status(500).send({
@@ -204,18 +156,18 @@ const verify = async (req, res) => {
 
   const user = await userController.getUserByEmail(email);
 
-  // const user = await userModel.findOne({ email, verificationCode: code }).select(' _id userName email');
-  if (user && user.isVerified === false) {
-
-    user.isVerified = true;
-    user.verificationCode = null;
-    await user.save();
-    res.status(200).send({
-      success: true,
-      message: 'Verification successfully.',
-      data: user._id
-    });
-    // You can handle login logic here
+  if (user && user.isVerified === false ) {
+    if(user.verificationCode === code){
+       user.isVerified = true;
+      await user.save();
+      res.status(200).send({
+        success: true,
+        message: 'Verification successfully.',
+        data: user._id
+      });
+    }else{
+      return res.status(400).json({ error: { message: 'Invalid verification code.' } });
+    }
   } else {
     res.send('Invalid verification code');
   }
@@ -234,7 +186,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Function to send verification email
-function sendVerificationEmail(email, code) {
+const sendVerificationEmail = async (email, code) => {
   const mailOptions = {
     from: 'bobtailsoda.dev@gmail.com',
     to: email,
@@ -264,8 +216,11 @@ const resendCode = async (req, res) => {
 
     if (user.verificationCode && user.isVerified === false) {
       const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
-      sendVerificationEmail(email, code); // Send email with verification code
-      await userModel.updateOne({ email }, { isVerified: false }, { verificationCode: code }); // Update code in database
+      await sendVerificationEmail(email, code); // Send email with verification code
+
+      user.isVerified = false;
+      user.verificationCode = code;
+      await user.save();
 
       res.status(200).send({
         success: true,
