@@ -15,16 +15,21 @@ const login = async (req, res) => {
 
     // Fetch user from database
     const user = await userController.getUserByEmail(email);
-    console.log(user);
+
     if (!user) {
-      return res.status(400).json({ error: { message: 'Invalid email' } });
+      return res.status(400).json({ error: { message: 'Invalid email. Please try again.' } });
+    }
+
+    //account not verify yet.
+    if (!user.isVerified) {
+      return res.status(400).json({ error: { message: 'Please veifiy your account. Verfication code is sent to your email.' } });
     }
 
     // Check password
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
-      return res.status(400).json({ error: { message: 'Invalid password' } });
+      return res.status(400).json({ error: { message: 'Invalid password. Please try again.' } });
     }
 
     res.status(200).json({ token: createJwt(user), userId: user._id });
@@ -177,7 +182,7 @@ const forgotPassword = async (req, res) => {
 
     sendVerificationEmail(email, code); // Send email with verification code
 
-    await userModel.updateOne({ email }, { verificationCode: code }); // Update code in database
+    await userModel.updateOne({ email }, { isVerified: false }, { verificationCode: code }); // Update code in database
 
     res.status(200).send({
       success: true,
@@ -200,7 +205,11 @@ const verify = async (req, res) => {
   const user = await userController.getUserByEmail(email);
 
   // const user = await userModel.findOne({ email, verificationCode: code }).select(' _id userName email');
-  if (user) {
+  if (user && user.isVerified === false) {
+
+    user.isVerified = true;
+    user.verificationCode = null;
+    await user.save();
     res.status(200).send({
       success: true,
       message: 'Verification successfully.',
@@ -253,10 +262,10 @@ const resendCode = async (req, res) => {
       return res.status(400).json({ error: { message: 'Invalid email' } });
     }
 
-    if (user.verificationCode) {
+    if (user.verificationCode && user.isVerified === false) {
       const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
       sendVerificationEmail(email, code); // Send email with verification code
-      await userModel.updateOne({ email }, { verificationCode: code }); // Update code in database
+      await userModel.updateOne({ email }, { isVerified: false }, { verificationCode: code }); // Update code in database
 
       res.status(200).send({
         success: true,
