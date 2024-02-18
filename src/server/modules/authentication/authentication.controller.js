@@ -69,7 +69,7 @@ const checkPassword = async (req, res) => {
 const signup = async (req, res) => {
   try {
     //step1: get data from body
-    const { firstName, lastName, userName, email, password, phone } = req.body;
+    const { firstName, lastName, gender, weight, height, userName, email, password, phone } = req.body;
 
     // step2: check email user in db , must not duplicate
     const isExisting = await userController.getUserByEmail(email);
@@ -87,6 +87,9 @@ const signup = async (req, res) => {
       const user = await userModel.create({
         firstName,
         lastName,
+        gender,
+        weight,
+        height,
         userName,
         email,
         password: hashedPassword,
