@@ -1,6 +1,6 @@
+import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
 import { config } from '../../config/config.js';
-import bcrypt from 'bcrypt';
 import { createJwt } from '../../utils/createJwt.js';
 
 import userController from '../users/user.controller.js';
@@ -134,10 +134,11 @@ const signup = async (req, res) => {
         verificationCode: code,
       }); // Save code to database
 
+      await sendVerificationEmail(email, code);
       // user = await userModel.create({ userName, email, password: hashedPassword, phone });
       user.password = undefined;
+      user.verificationCode = undefined;
       // step6: Send email with verification code
-      await sendVerificationEmail(email, code);
       console.log('Verification code sent to your email.');
 
       console.log('create user success');
