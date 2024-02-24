@@ -315,7 +315,7 @@ dist-ssr
     export default { createUser, getUsers, getUserById, updateUser, changePassword, deleteUser };
 ```
 #### 5.4 create router by user.router.js 
-` import express from 'express';
+``` import express from 'express';
   import userController from './user.controller.js';
 
   const router = express.Router();
@@ -328,7 +328,7 @@ dist-ssr
   router.delete('/:id', userController.deleteUser);
 
   export default router;
-`
+```
 
 #### step 5.5 set everything in main.js that already created at root 
 ``` import cors from 'cors';
