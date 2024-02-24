@@ -120,7 +120,7 @@ dist-ssr
 #### 5.2 create user.model.js and create userSchema with this basic code and this Schema as 'User' variable this part will create at mongoDB collection name User and model of collection as we set
 
 **** this one is for use function from database ****
-` import mongoose from 'mongoose'
+``` import mongoose from 'mongoose'
   
   const userSchema = new mongoose.Schema(
     {
@@ -146,7 +146,7 @@ dist-ssr
   );
 
   export default mongoose.model('User', userSchema);
-  `
+  ```
 #### 5.3 create user controller by createa user.controller.js and write this code in ,and it about get, create, update, delete
 ``` import userModel from './user.model.js';
 
